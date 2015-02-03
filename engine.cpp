@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include "engine.h"
@@ -11,7 +12,7 @@ Engine::Engine()
 }
 
 void
-Engine::Initialize(const char* window_name, const Veci window_size) {
+Engine::Initialize(std::string window_name, const Veci window_size) {
   std::cout << "Starting Engine" << std::endl;
   
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -26,7 +27,7 @@ Engine::Initialize(const char* window_name, const Veci window_size) {
     std::cout << SDL_GetError() << std::endl;
   }
   
-	window = SDL_CreateWindow(window_name,
+	window = SDL_CreateWindow(window_name.c_str(),
 											SDL_WINDOWPOS_UNDEFINED,
 											SDL_WINDOWPOS_UNDEFINED,
 											window_size.x,
@@ -49,13 +50,26 @@ Engine::Initialize(const char* window_name, const Veci window_size) {
     std::cout << SDL_GetError() << std::endl;
   }
   
-  std::vector<SDL_Rect> src_rect_player = { {0,0,128,128},
-                                            {0,128,128,128},
-                                            {0,256,128,128} };
+  logic_sprite_sheet = IMG_LoadTexture(renderer, "sprites/logic.png");
+  if(!logic_sprite_sheet){
+    std::cout << SDL_GetError() << std::endl;
+  }
+  
+  std::vector<SDL_Rect> src_rect = {{0,0,64,64},
+                                    {0,64,64,64},
+                                    {0,128,64,64}};
   sprites_data[kTexture_Player] = 
-          SpriteData(character_sprite_sheet, 3, src_rect_player, 100);
+          SpriteData(character_sprite_sheet, 3, src_rect, 100);
           
-    
+  src_rect = {{48,0,16,16}};
+  sprites_data[kTexture_Wire_Empty] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0);  
+  src_rect = {{0,0,48,48}};
+  sprites_data[kTexture_And] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0);  
+  src_rect = {{48,48,48,48}};
+  sprites_data[kTexture_Or] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0);  
 }
 
 void 
@@ -64,6 +78,10 @@ Engine::Render(GameData& game_data) {
   SDL_RenderClear(renderer);
   
   
-  game_data.player.Render(this);
+  game_data.Render(*this);
   SDL_RenderPresent(renderer);
+}
+
+void Engine::MoveCamera(const Vecf& movement) {
+  AddVecf(movement, &camera);
 }

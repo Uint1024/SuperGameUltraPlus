@@ -11,7 +11,8 @@
 #include "solid.h"
 
 struct LogicGate {
-  Solid physic;
+  LogicGate(const Vecf& position);
+  Bbox bbox;
 };
 
 #endif	/* LOGICGATE_H */

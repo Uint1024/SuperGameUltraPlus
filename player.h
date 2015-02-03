@@ -10,16 +10,17 @@
 #include <array>
 #include "solid.h"
 #include "utils.h"
-#include "sprite_state.h"
+#include "dynamic_sprite.h"
+#include "solid_body.h"
+
 class Engine;
 
 struct Player {
   Player(const Vecf& pos);
-  void Render(Engine* engine);
-  void ReceiveInput(std::array<bool, kKey_Count> keys_down,
+  Vecf ReceiveInput(std::array<bool, kKey_Count> keys_down,
                     std::array<bool, 255> mouse_buttons_down);
-  Bbox bbox;
-  SpriteState sprite_state;
+  SolidBody body;
+
 };
 
 #endif	/* PLAYER_H */

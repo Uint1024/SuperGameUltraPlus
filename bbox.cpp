@@ -7,7 +7,6 @@ left(position.x)
 ,right(position.x + size.x)
 ,bottom(position.y + size.y)
 ,size(size_){
-  std::cout << "lol" << size.y << std::endl;
 }
 
 int Bbox::Move(Vecf& movement) {

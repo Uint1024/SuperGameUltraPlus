@@ -17,6 +17,19 @@ struct Veci {
   int x, y;
 };
 
+void AddVecf(const Vecf& to_add, Vecf* base);
+
+enum eGateType {
+  kGateType_And,
+  kGateType_Or
+};
+
+enum eConnection {
+  kConnection_In,
+  kConnection_Out,
+  kConnection_Neutral
+};
+
 enum eKey {
   kKey_Up,
   kKey_Down,
@@ -41,7 +54,9 @@ enum eTexture {
   kTexture_Player,
   kTexture_And,
   kTexture_Or,
-  kTexture_Wire,
+  kTexture_Wire_Empty,
+  kTexture_Wire_1,
+  kTexture_Wire_0,
   kTexture_None,
   kTexture_Count
 };
