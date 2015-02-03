@@ -15,6 +15,7 @@ class Engine;
 struct Wire {
   Wire(const Vecf& position);
   SolidBody body;
+  Wire* parent;
 };
 
 #endif	/* WIRE_H */

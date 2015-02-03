@@ -8,9 +8,7 @@
 #ifndef PLAYER_H
 #define	PLAYER_H
 #include <array>
-#include "solid.h"
 #include "utils.h"
-#include "dynamic_sprite.h"
 #include "solid_body.h"
 
 class Engine;

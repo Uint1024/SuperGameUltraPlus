@@ -10,8 +10,10 @@
 #include "utils.h"
 
 struct Bbox {
-  Bbox(const Vecf& position, const Veci& size_);
-  Move(Vecf& movement);
+  Bbox(const Vecf& position, const Veci& size);
+  void Move(const Vecf& movement);
+  void MoveTo(const Vecf& position);
+  bool CollisionWithPoint(const Vecf& point);
   float top, left, bottom, right;
   Veci size;
 };

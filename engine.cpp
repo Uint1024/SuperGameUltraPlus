@@ -6,7 +6,8 @@
 #include "gamedata.h"
 
 //Does nothing, don't forget to initialize !
-Engine::Engine()
+Engine::Engine() :
+camera{0.0f,0.0f}
 {
   
 }
@@ -64,12 +65,22 @@ Engine::Initialize(std::string window_name, const Veci window_size) {
   src_rect = {{48,0,16,16}};
   sprites_data[kTexture_Wire_Empty] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0);  
+  
   src_rect = {{0,0,48,48}};
   sprites_data[kTexture_And] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0);  
+  
   src_rect = {{48,48,48,48}};
   sprites_data[kTexture_Or] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0);  
+  
+  src_rect = {{48,48,48,48}};
+  sprites_data[kTexture_Or] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0);
+  
+  src_rect = {{64,0,48,48}};
+  sprites_data[kTexture_Constant_1] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0);
 }
 
 void 
@@ -84,4 +95,5 @@ Engine::Render(GameData& game_data) {
 
 void Engine::MoveCamera(const Vecf& movement) {
   AddVecf(movement, &camera);
+  std::cout << "wtf" << std::endl;
 }

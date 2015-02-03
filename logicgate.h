@@ -8,11 +8,13 @@
 #ifndef LOGICGATE_H
 #define	LOGICGATE_H
 #include "utils.h"
-#include "solid.h"
+#include "solid_body.h"
 
 struct LogicGate {
-  LogicGate(const Vecf& position);
-  Bbox bbox;
+  LogicGate(const Vecf& position, const eEditorObject type);
+  SolidBody body;
+  eGateType type;
+  
 };
 
 #endif	/* LOGICGATE_H */

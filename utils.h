@@ -19,9 +19,20 @@ struct Veci {
 
 void AddVecf(const Vecf& to_add, Vecf* base);
 
+enum eEditorObject {
+  kEditorObject_And,
+  kEditorObject_Or,
+  kEditorObject_Wire,
+  kEditorObject_Constant_1,
+  kEditorObject_Constant_0,
+  kEditorObject_None,
+  kEditorObject_Count
+};
 enum eGateType {
   kGateType_And,
-  kGateType_Or
+  kGateType_Or,
+  kGateType_Constant_1,
+  kGateType_Constant_0
 };
 
 enum eConnection {
@@ -35,8 +46,11 @@ enum eKey {
   kKey_Down,
   kKey_Left,
   kKey_Right,
+  kKey_Wire,
   kKey_And,
   kKey_Or,
+  kKey_Constant_1,
+  kKey_Constant_0,
   kKey_Inventory,
   kKey_Workshop,
   kKey_Copy,
@@ -57,6 +71,8 @@ enum eTexture {
   kTexture_Wire_Empty,
   kTexture_Wire_1,
   kTexture_Wire_0,
+  kTexture_Constant_1,
+  kTexture_Constant_0,
   kTexture_None,
   kTexture_Count
 };

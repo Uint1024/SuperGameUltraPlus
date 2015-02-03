@@ -3,7 +3,6 @@
 #include "dynamic_sprite.h"
 #include "sprite_data.h"
 #include "utils.h"
-#include "solid.h"
 
 DynamicSprite::DynamicSprite(eTexture texture_id) :
 texture_id(texture_id)

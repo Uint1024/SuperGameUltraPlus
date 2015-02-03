@@ -22,10 +22,17 @@ struct GameData{
           const std::array<bool, 255>& mouse_buttons_down,
           const Veci& mouse_position_in_window,
           const Vecf& mouse_position_in_world);
+  void Clean();
   Player player;
   Veci map_size;
   std::vector<LogicGate*> logic_gate_map;
   std::vector<Wire*> wire_map;
+  eEditorObject currently_selected_object;
+  Veci mouse_grid_position;
+  Vecf grid_position_position;
+  
+  LogicGate* temporary_gate;
+  Wire* temporary_wire;
 };
 
 #endif	/* GAMEDATA_H */

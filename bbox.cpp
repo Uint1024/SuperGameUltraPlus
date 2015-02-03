@@ -1,17 +1,37 @@
 #include <iostream>
 #include "bbox.h"
 
-Bbox::Bbox(const Vecf& position, const Veci& size_) :
+Bbox::Bbox(const Vecf& position, const Veci& size) :
 left(position.x)
 ,top(position.y)
 ,right(position.x + size.x)
 ,bottom(position.y + size.y)
-,size(size_){
+,size(size){
 }
 
-int Bbox::Move(Vecf& movement) {
+void
+Bbox::Move(const Vecf& movement) {
   left += movement.x;
   right += movement.x;
   top += movement.y;
   bottom += movement.y;
+}
+
+void 
+Bbox::MoveTo(const Vecf& position) {
+  left = position.x;
+  right = position.x + size.x;
+  top = position.y;
+  bottom = position.y  + size.y;
+}
+
+bool 
+Bbox::CollisionWithPoint(const Vecf& point) {
+  //std::cout << left << ">" << point.x << " ; " << right << " < " << point.x  << std::endl;
+  if(left > point.x || right < point.x || 
+     top > point.y || bottom < point.y) {
+    return false;
+  }
+  
+  return right;
 }
