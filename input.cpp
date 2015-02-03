@@ -1,4 +1,5 @@
 #include <iostream>
+#include "player.h"
 #include "input.h"
 
 Input::Input() : 
@@ -7,25 +8,14 @@ mouse_position_in_world{0.0f,0.0f}
 ,mouse_buttons_down{false}
 ,keys_down{false}
 ,keys_up{false}
-,keymap{kKey_None}               
-{
-  /*for(auto &i : mouse_buttons_down){
-    i = false;
-  }
-  for(auto &i : keys_down){
-    i = false;
-  }
-  for(auto &i : keys_up){
-    i = false;
-  }
-  for(auto &i : keymap){
-    i = kKey_None;
-  }
-  */
+,keymap{kKey_None} {
   keymap[SDL_SCANCODE_S] = kKey_Down;
+  keymap[SDL_SCANCODE_D] = kKey_Right;
+  keymap[SDL_SCANCODE_A] = kKey_Left;
+  keymap[SDL_SCANCODE_W] = kKey_Up;
 }
 
-bool Input::pollEvents() {
+bool Input::PollEvents(Player& player) {
   while (SDL_PollEvent(&e) != 0) {
     if (e.type == SDL_QUIT){
       return false;
@@ -48,9 +38,7 @@ bool Input::pollEvents() {
     }
   }
   
-  if (keys_down[kKey_Down]) {
-    std::cout << "yay" << std::endl;
-  }
+  player.ReceiveInput(keys_down, mouse_buttons_down);
   
   return true;
 }

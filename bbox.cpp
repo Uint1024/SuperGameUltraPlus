@@ -9,3 +9,10 @@ left(position.x)
 ,size(size_){
   std::cout << "lol" << size.y << std::endl;
 }
+
+int Bbox::Move(Vecf& movement) {
+  left += movement.x;
+  right += movement.x;
+  top += movement.y;
+  bottom += movement.y;
+}

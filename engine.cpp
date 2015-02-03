@@ -2,7 +2,7 @@
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include "engine.h"
-#include "globals.h"
+#include "gamedata.h"
 
 //Does nothing, don't forget to initialize !
 Engine::Engine()
@@ -11,7 +11,7 @@ Engine::Engine()
 }
 
 void
-Engine::initialize(const char* window_name, const Veci window_size) {
+Engine::Initialize(const char* window_name, const Veci window_size) {
   std::cout << "Starting Engine" << std::endl;
   
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -53,17 +53,17 @@ Engine::initialize(const char* window_name, const Veci window_size) {
                                             {0,128,128,128},
                                             {0,256,128,128} };
   sprites_data[kTexture_Player] = 
-          SpriteData(character_sprite_sheet, 3, src_rect_player);
+          SpriteData(character_sprite_sheet, 3, src_rect_player, 100);
           
     
 }
 
 void 
-Engine::render() {
+Engine::Render(GameData& game_data) {
   SDL_SetRenderDrawColor(renderer, 210, 210, 210, 255);
   SDL_RenderClear(renderer);
   
   
-  g_game_data.player.render();
+  game_data.player.Render(this);
   SDL_RenderPresent(renderer);
 }

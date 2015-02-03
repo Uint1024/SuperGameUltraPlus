@@ -17,6 +17,26 @@ struct Veci {
   int x, y;
 };
 
+enum eKey {
+  kKey_Up,
+  kKey_Down,
+  kKey_Left,
+  kKey_Right,
+  kKey_And,
+  kKey_Or,
+  kKey_Inventory,
+  kKey_Workshop,
+  kKey_Copy,
+  kKey_Paste,
+  kKey_Select,
+  kKey_Delete,
+  kKey_Raise,
+  kKey_Lower,
+  kKey_ToggleHeight,
+  kKey_None,
+  kKey_Count
+};
+
 enum eTexture {
   kTexture_Player,
   kTexture_And,

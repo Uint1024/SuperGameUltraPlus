@@ -14,11 +14,11 @@
 #include "utils.h"
 #include "sprite_data.h"
 
-
+class GameData;
 struct Engine {
   Engine();
-  void initialize(const char* window_name, const Veci window_size);
-  void render();
+  void Initialize(const char* window_name, const Veci window_size);
+  void Render(GameData& game_data);
   SDL_Window* window;
   SDL_Renderer* renderer;
   Uint32 pixel_format; //pixel format of the window, used with SDL_RenderCopy

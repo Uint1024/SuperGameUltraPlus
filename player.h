@@ -7,12 +7,17 @@
 
 #ifndef PLAYER_H
 #define	PLAYER_H
+#include <array>
 #include "solid.h"
+#include "utils.h"
 #include "sprite_state.h"
+class Engine;
 
 struct Player {
   Player(const Vecf& pos);
-  void render();
+  void Render(Engine* engine);
+  void ReceiveInput(std::array<bool, kKey_Count> keys_down,
+                    std::array<bool, 255> mouse_buttons_down);
   Bbox bbox;
   SpriteState sprite_state;
 };

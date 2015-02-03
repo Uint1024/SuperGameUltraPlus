@@ -19,6 +19,8 @@ struct SpriteState {
   eTexture texture_id;
   eDirection direction;
   Bbox* body;
+  int animation_timer;
+  bool moving;
 };
 
 #endif	/* SPRITE_H */

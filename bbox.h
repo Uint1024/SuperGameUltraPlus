@@ -11,6 +11,7 @@
 
 struct Bbox {
   Bbox(const Vecf& position, const Veci& size_);
+  Move(Vecf& movement);
   float top, left, bottom, right;
   Veci size;
 };

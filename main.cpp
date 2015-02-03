@@ -25,31 +25,32 @@
 #include <iostream>
 #include "utils.h"
 #include "gamedata.h"
-#include "globals.h"
+#include "engine.h"
+#include "input.h"
 
 using namespace std;
 
-GameData g_game_data;
+int g_delta_t = 0;
 
-Engine g_engine;
-Input g_input;
 high_resolution_clock_time_point (*TimeNow)() = 
         &std::chrono::high_resolution_clock::now;
 
 int main(int argc, char** argv) {
-  Bbox* test = &g_game_data.player.bbox;
-  std::cout << "lolol" << test->bottom << std::endl;
+  GameData game_data;
+  Engine engine;
+  Input input;
+
   /*Used to calculate delta_t*/
   auto current =  TimeNow();
   auto last =  TimeNow();
   auto diff = current - last;
-  int g_delta_t = 0;
+  
   
   int fps = 0;
   
   bool running = true;
   
-  g_engine.initialize("Electron Simulator", Veci{1280, 720});
+  engine.Initialize("Electron Simulator", Veci{1280, 720});
   
   //limit to 120 fps (= 1 frame every 15 ms)
   while (running) {
@@ -58,9 +59,8 @@ int main(int argc, char** argv) {
     g_delta_t += std::chrono::duration_cast<milliseconds>(diff).count();
     
     if (g_delta_t >= 8) {  
-      
-      running = g_input.pollEvents();
-      g_engine.render();
+      running = input.PollEvents(game_data.player);
+      engine.Render(game_data);
       
       g_delta_t = 0;
     } 
