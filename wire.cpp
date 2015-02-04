@@ -1,6 +1,8 @@
 #include <iostream>
 #include "wire.h"
 #include "solid_body.h"
+#include "energy.h"
+
 #include "static_body.h"
 Wire::Wire(const Vecf& position, const int position_in_array, 
         const eDirection direction) :
@@ -13,9 +15,67 @@ visited(false){
 }
 
 void 
+Wire::CheckIfHasEnergy(std::vector<Energy*> energy_map) {
+  
+  if(energy_map[position_in_array]){
+    logical_state = energy_map[position_in_array]->state;
+    switch(logical_state){
+      case kLogicalState_0:
+        body->sprite.texture_id = kTexture_Wire_0;
+        break;
+      case kLogicalState_1:
+        body->sprite.texture_id = kTexture_Wire_1;
+        break;
+      case kLogicalState_Empty:
+        body->sprite.texture_id = kTexture_Wire_Empty;
+        break;
+      default:
+        std::cout << "Error, unknown state." << std::endl;
+        break;
+    }
+  } else {
+    logical_state = kLogicalState_Empty;
+    body->sprite.texture_id = kTexture_Wire_Empty;
+  }
+}
+
+
+void 
+Wire::MoveElectrons(std::vector<Wire*> wire_map, const Veci& map_size) {
+  Wire* wire_to_send_to = nullptr;
+  switch(body->direction){
+    case kDirection_Right:
+      if(position_in_array + 1 < wire_map.size()) {
+        wire_to_send_to = wire_map[position_in_array + 1];
+      }
+    case kDirection_Up:
+      if(position_in_array - map_size.x > 0) {
+        wire_to_send_to = wire_map[position_in_array - map_size.x];
+      }
+      break;
+    case kDirection_Left:
+      if(position_in_array - 1 < wire_map.size()) {
+        wire_to_send_to = wire_map[position_in_array - 1];
+      }
+      break;
+    case kDirection_Down:
+      if(position_in_array + map_size.x < wire_map.size()) {
+        wire_to_send_to = wire_map[position_in_array + map_size.x];
+      }
+      break;
+  }
+  
+  if(wire_to_send_to){
+    
+  }
+}
+
+void 
 Wire::ChangeState(Wire* parent, eLogicalState state, 
         std::vector<Wire*>& wire_map,
         const Veci& map_size) {
+  logical_state = state;
+  /*
   visited = true;
   parent = parent;
   logical_state = state;
@@ -34,14 +94,6 @@ Wire::ChangeState(Wire* parent, eLogicalState state,
       break;
   }
   
-  /*for(auto &wire : wire_map){
-    if(wire){
-      if(wire != this && wire != parent && 
-              wire->body.bbox.CollisionWithBbox(body.bbox)){
-        wire->ChangeState(this, logical_state, wire_map);
-      }
-    }
-  }*/
   Wire* wire_right = nullptr;
   Wire* wire_up = nullptr;
   Wire* wire_left = nullptr;
@@ -81,44 +133,7 @@ Wire::ChangeState(Wire* parent, eLogicalState state,
       break;
     
   }
-  
-    /*
-    Wire* wire_left = nullptr;
-    Wire* wire_top = nullptr;
-    Wire* wire_bottom = nullptr;
-      
-    
-     
-    if(position_in_array - 1 > 0)
-      wire_left = wire_map[position_in_array - 1];
-    
-    
-    
-    
-    
-    if(wire_right){
-      
-      if(wire_right->logical_state != logical_state && wire_right != parent){
-        
-        wire_right->ChangeState(this, logical_state, wire_map, map_size);        
-      }
-    }
-    */
-    /*if(wire_left){
-      if(wire_left->logical_state != logical_state && wire_left != parent){
-        wire_left->ChangeState(this, logical_state, wire_map, map_size);        
-      }
-    }
-    if(wire_top){
-      if(wire_top->logical_state != logical_state && wire_top != parent){
-        wire_top->ChangeState(this, logical_state, wire_map, map_size);        
-      }
-    }
-    if(wire_bottom){
-      if(wire_bottom->logical_state != logical_state && wire_bottom != parent){
-        wire_bottom->ChangeState(this, logical_state, wire_map, map_size);        
-      }
-    }*/
+ */
   
 }
 

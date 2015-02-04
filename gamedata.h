@@ -10,6 +10,8 @@
 
 #include <vector>
 #include "logicgate.h"
+#include "energy.h"
+
 #include "player.h"
 class Wire;
 class Engine;
@@ -27,6 +29,7 @@ struct GameData{
   void ResetWiresVisitedState();
   Player player;
   Veci map_size;
+  std::vector<Energy*> energy_map;
   std::vector<LogicGate*> battery_map;
   std::vector<LogicGate*> logic_gate_map;
   std::vector<Wire*> wire_map;

@@ -11,7 +11,7 @@
 #include "solid_body.h"
 
 class Engine;
-
+class Energy;
 struct Wire {
   Wire(const Vecf& position, const int position_in_array,
           const eDirection direction);
@@ -19,12 +19,14 @@ struct Wire {
                       std::vector<Wire*>& wire_map,
                       const Veci& map_size);
   void CheckOutputToWire(std::vector<Wire*> wire_map);
+  void MoveElectrons(std::vector<Wire*> wire_map, const Veci& map_size);
+  void CheckIfHasEnergy(std::vector<Energy*> energy_map);
   void ResetState();
   int position_in_array;
   SolidBody* body;
   Wire* parent;
   eLogicalState logical_state;
-  //wires can only be visited once per frame
+  //wires can only be visited once per frame to prevent infinite loop
   bool visited;
 };
 

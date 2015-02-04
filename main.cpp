@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
       running = input.PollEvents(game_data, engine);
       game_data.Update();
       engine.Render(game_data);
-      game_data.ResetWiresVisitedState();
+      //game_data.ResetWiresVisitedState();
       g_delta_t = 0;
     } 
     
