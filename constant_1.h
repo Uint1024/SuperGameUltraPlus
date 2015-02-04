@@ -1,22 +1,23 @@
 /* 
- * File:   and.h
+ * File:   constant_1.h
  * Author: John
  *
- * Created on 2 février 2015, 19:19
+ * Created on 4 février 2015, 23:35
  */
 
-#ifndef AND_H
-#define	AND_H
+#ifndef CONSTANT_1_H
+#define	CONSTANT_1_H
+
 #include "logicgate.h"
 
-struct AndGate : public LogicGate{
-  AndGate(const Vecf& position,
+
+struct Constant_1 : LogicGate{
+  Constant_1(const Vecf& position,
             const eDirection direction, const int position_in_array,
             const Veci& map_size);
-
   virtual void RunLogic(std::vector<Energy*>& energy_map) override;
 
 };
 
-#endif	/* AND_H */
+#endif	/* CONSTANT_1_H */
 

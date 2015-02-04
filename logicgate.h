@@ -25,7 +25,7 @@ struct LogicGate {
   SolidBody* body;
   eGateType type;
   eLogicalState logical_state;
-  virtual void RunLogic() = 0;
+  virtual void RunLogic(std::vector<Energy*>& energy_map) = 0;
   /*Bbox* input_bbox[2];
   Bbox* output_bbox;*/
   //each logic gate is a 3*3, each cell can be an output, an input, or neutral
@@ -37,6 +37,7 @@ struct LogicGate {
   int position_in_map_grid;
   //position of the wire it will output to
   int output_position_in_map_grid;
+  int input_position_in_map_grid[2];
 };
 
 #endif	/* LOGICGATE_H */

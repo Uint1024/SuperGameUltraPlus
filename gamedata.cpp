@@ -3,6 +3,7 @@
 #include "engine.h"
 #include "wire.h"
 #include "and_gate.h"
+#include "constant_1.h"
 #include <memory>
 
 GameData::GameData(const Veci& window_size) :
@@ -105,8 +106,8 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
   if(keys_down[kKey_Constant_1]){
     currently_selected_object = kEditorObject_Constant_1;
     Clean();
-    /*temporary_gate = new LogicGate(grid_position_position,
-            kDirection_Down, 0, map_size);*/
+    temporary_gate = new Constant_1(grid_position_position,
+            kDirection_Down, 0, map_size);
   }
   
   
@@ -145,8 +146,11 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
     }*/
   if(mouse_buttons_down[SDL_BUTTON_LEFT]){
     if(currently_selected_object == kEditorObject_And) {
-      /*logic_gate_map.push_back(new AndGate(grid_position_position, kDirection_Down,
-             position_in_vector, map_size));*/
+      logic_gate_map.push_back(new AndGate(grid_position_position, kDirection_Down,
+             position_in_vector, map_size));
+    } else if(currently_selected_object == kEditorObject_Constant_1){
+      logic_gate_map.push_back(new Constant_1(grid_position_position, kDirection_Down,
+             position_in_vector, map_size));
     } else if(currently_selected_object == kEditorObject_Wire) {
 
         std::cout << position_in_vector << std::endl;
@@ -175,19 +179,7 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
 }
 
 void 
-GameData::Update() {
-
-  
-  /*for(int i = 0 ; i < energy_map.size() ; i++){
-    if(energy_map[i]){
-    
-      
-      energy_map[i]->FollowWires(wire_map, map_size);
-    }
-  }*/
-
-  
-  
+GameData::Update() {  
   for(auto &wire : wire_map){
     if(wire){
       wire->CheckIfHasEnergy(energy_map);
@@ -274,12 +266,12 @@ GameData::Update() {
     }
   }*/
   
-  for(auto &logic_gate : battery_map){
+  for(auto &logic_gate : logic_gate_map){
     if(logic_gate){
       logic_gate->CheckOutputToWires(energy_map, map_size);
+      logic_gate->RunLogic(energy_map);
     }
   }
-  
 }
 
 void 
