@@ -22,9 +22,12 @@ struct GameData{
           const std::array<bool, 255>& mouse_buttons_down,
           const Veci& mouse_position_in_window,
           const Vecf& mouse_position_in_world);
+  void Update();
   void Clean();
+  void ResetWiresVisitedState();
   Player player;
   Veci map_size;
+  std::vector<LogicGate*> battery_map;
   std::vector<LogicGate*> logic_gate_map;
   std::vector<Wire*> wire_map;
   eEditorObject currently_selected_object;
@@ -33,6 +36,8 @@ struct GameData{
   
   LogicGate* temporary_gate;
   Wire* temporary_wire;
+  eDirection temporary_rotation;
+
 };
 
 #endif	/* GAMEDATA_H */

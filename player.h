@@ -17,7 +17,7 @@ struct Player {
   Player(const Vecf& pos);
   Vecf ReceiveInput(std::array<bool, kKey_Count> keys_down,
                     std::array<bool, 255> mouse_buttons_down);
-  SolidBody body;
+  SolidBody* body;
 
 };
 

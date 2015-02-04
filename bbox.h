@@ -14,6 +14,7 @@ struct Bbox {
   void Move(const Vecf& movement);
   void MoveTo(const Vecf& position);
   bool CollisionWithPoint(const Vecf& point);
+  bool CollisionWithBbox(const Bbox& other);
   float top, left, bottom, right;
   Veci size;
 };

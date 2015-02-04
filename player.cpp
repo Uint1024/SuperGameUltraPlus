@@ -2,9 +2,10 @@
 #include "sprite_data.h"
 #include "player.h"
 #include "engine.h"
+#include "dynamic_body.h"
 
 Player::Player(const Vecf& pos) :
-body(pos, Veci{64, 64}, kTexture_Player){
+body(new DynamicBody(pos, Veci{64, 64}, kTexture_Player, kDirection_Down)){
 }
 
 Vecf Player::ReceiveInput(std::array<bool, kKey_Count> keys_down,
@@ -18,17 +19,17 @@ Vecf Player::ReceiveInput(std::array<bool, kKey_Count> keys_down,
   }
   
   if(movement.x != 0.0f || movement.y != 0.0f){
-    body.sprite.moving = true;
-    body.sprite.animation_timer += g_delta_t;
-    if(body.sprite.animation_timer > 200){
-      ++body.sprite.current_frame;
-      if(body.sprite.current_frame == 3){
-        body.sprite.current_frame = 0;
+    body->sprite.moving = true;
+    body->sprite.animation_timer += g_delta_t;
+    if(body->sprite.animation_timer > 200){
+      ++body->sprite.current_frame;
+      if(body->sprite.current_frame == 3){
+        body->sprite.current_frame = 0;
       }
-      body.sprite.animation_timer  = 0;
+      body->sprite.animation_timer  = 0;
     }
   }
-  body.bbox.Move(movement);
+  body->bbox.Move(movement);
   
   return movement;
 }

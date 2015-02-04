@@ -8,10 +8,8 @@
 #ifndef AND_H
 #define	AND_H
 #include "logicgate.h"
-#include "solid.h"
 
 struct And {
-  Solid gate;
 };
 
 #endif	/* AND_H */

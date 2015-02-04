@@ -14,10 +14,12 @@
 class Engine;
 
 struct SolidBody {
-  SolidBody(const Vecf& position, const Veci& size, const eTexture texture_id);
-  void Render(Engine& engine);
+  SolidBody(const Vecf& position, const Veci& size, const eTexture texture_id,
+            const eDirection direction);
+  virtual void Render(Engine& engine) = 0;
   Bbox bbox;
   DynamicSprite sprite;
+  eDirection direction;
 };
 
 #endif	/* SOLIDBODY_H */

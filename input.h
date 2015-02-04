@@ -26,6 +26,10 @@ struct Input {
   std::array<bool, kKey_Count> keys_up;
   Veci mouse_position_in_window;
   Vecf mouse_position_in_world;
+          
+            
+  int rotate_left_key_press_timer;
+  int delay_between_key_press;
 };
 
 #endif	/* INPUT_H */

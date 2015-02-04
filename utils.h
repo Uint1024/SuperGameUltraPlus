@@ -61,7 +61,23 @@ enum eKey {
   kKey_Lower,
   kKey_ToggleHeight,
   kKey_None,
+  kKey_Rotate_Left,
+  kKey_Rotate_Right,
   kKey_Count
+};
+
+enum eLogicGatePart {
+  kLogicGatePart_Output,
+  kLogicGatePart_Input,
+  kLogicGatePart_Neutral,
+  kLogicGatePart_Count
+};
+
+enum eLogicalState {
+  kLogicalState_1,
+  kLogicalState_0,
+  kLogicalState_Empty,
+  kLogicalState_Count
 };
 
 enum eTexture {
@@ -78,10 +94,10 @@ enum eTexture {
 };
 
 enum eDirection {
-  kDirection_Up,
+  kDirection_Right,
   kDirection_Down,
   kDirection_Left,
-  kDirection_Right,
+  kDirection_Up,
   kDirection_Count
 };
 
