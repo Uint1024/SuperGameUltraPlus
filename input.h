@@ -28,7 +28,7 @@ struct Input {
   Vecf mouse_position_in_world;
           
             
-  int rotate_left_key_press_timer;
+  int rotate_key_press_timer;
   int delay_between_key_press;
 };
 

@@ -18,16 +18,16 @@ class Wire;
 class Energy;
 
 struct LogicGate {
-  LogicGate(const Vecf& position, const eEditorObject type,
+  LogicGate(const Vecf& position,
             const eDirection direction, const int position_in_array,
-            const Veci& map_size, std::vector<Wire*>& wire_map);
+            const Veci& map_size, const eTexture texture_id);
   void CheckOutputToWires(std::vector<Energy*>& energy_map, const Veci& map_size);
   SolidBody* body;
   eGateType type;
   eLogicalState logical_state;
+  virtual void RunLogic() = 0;
   /*Bbox* input_bbox[2];
   Bbox* output_bbox;*/
-  Wire* output_wire;
   //each logic gate is a 3*3, each cell can be an output, an input, or neutral
   //each logic gate has its own because it can be rotated
   std::array<eLogicGatePart, 9> parts_map;

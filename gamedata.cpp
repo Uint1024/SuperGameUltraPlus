@@ -2,6 +2,7 @@
 #include "gamedata.h"
 #include "engine.h"
 #include "wire.h"
+#include "and_gate.h"
 #include <memory>
 
 GameData::GameData(const Veci& window_size) :
@@ -30,8 +31,6 @@ GameData::InitializeWorld(const Veci& window_size) {
 
 void 
 GameData::Render(Engine& engine) {
-  
-  
   for(auto &logic_gate : logic_gate_map){
     if(logic_gate){
       logic_gate->body->Render(engine);
@@ -89,17 +88,9 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
   }
   if(keys_down[kKey_Rotate_Right]){
     temporary_rotation = (eDirection)(temporary_rotation + 1);
-    if(temporary_rotation >= kDirection_Count){
+    if(temporary_rotation >= (int)kDirection_Count){
       temporary_rotation = (eDirection)0;
     }
-  }
-  
-  if(keys_down[kKey_Constant_1]){
-    currently_selected_object = kEditorObject_Constant_1;
-    Clean();
-    temporary_gate = new LogicGate(grid_position_position, 
-            kEditorObject_Constant_1,
-            kDirection_Down, 0, map_size, wire_map);
     pressed_rotation_key = true;
   }
   
@@ -108,13 +99,25 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
       Clean();
       temporary_wire = new Wire(grid_position_position, 0, temporary_rotation);
     }
-    
   }
+  
+  
+  if(keys_down[kKey_Constant_1]){
+    currently_selected_object = kEditorObject_Constant_1;
+    Clean();
+    /*temporary_gate = new LogicGate(grid_position_position,
+            kDirection_Down, 0, map_size);*/
+  }
+  
+  
   
   if(keys_down[kKey_And]){
     Clean();
     currently_selected_object = kEditorObject_And;
+    temporary_gate = new AndGate(grid_position_position, kDirection_Down,
+            0, map_size);
   }
+  
   if(keys_down[kKey_Or]){
     Clean();
     currently_selected_object = kEditorObject_Or;
@@ -132,22 +135,26 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
     temporary_gate->body->bbox.MoveTo(grid_position_position);
   }
   
-  if(currently_selected_object == kEditorObject_Constant_1 || 
+  /*if(currently_selected_object == kEditorObject_Constant_1 || 
                   currently_selected_object == kEditorObject_And ||
                   currently_selected_object == kEditorObject_Or){
     if(mouse_buttons_down[SDL_BUTTON_LEFT]){
         battery_map.push_back(new LogicGate(grid_position_position,
                   currently_selected_object, kDirection_Down,
                 position_in_vector, map_size, wire_map));
-    }
-  } else if(currently_selected_object == kEditorObject_Wire) {
-    if(mouse_buttons_down[SDL_BUTTON_LEFT]){
-      std::cout << position_in_vector << std::endl;
-      delete wire_map[position_in_vector];
-      wire_map[position_in_vector] = nullptr;
-      wire_map[position_in_vector] = new Wire(grid_position_position,
-                position_in_vector, temporary_rotation);
-      
+    }*/
+  if(mouse_buttons_down[SDL_BUTTON_LEFT]){
+    if(currently_selected_object == kEditorObject_And) {
+      /*logic_gate_map.push_back(new AndGate(grid_position_position, kDirection_Down,
+             position_in_vector, map_size));*/
+    } else if(currently_selected_object == kEditorObject_Wire) {
+
+        std::cout << position_in_vector << std::endl;
+        delete wire_map[position_in_vector];
+        wire_map[position_in_vector] = nullptr;
+        wire_map[position_in_vector] = new Wire(grid_position_position,
+                  position_in_vector, temporary_rotation);
+
     }
   }
   if(mouse_buttons_down[SDL_BUTTON_RIGHT]){ 
@@ -180,7 +187,7 @@ GameData::Update() {
   }*/
 
   
-  std::cout << energy_map[401] << " " << energy_map[402] << " " << energy_map[403] << std::endl;
+  
   for(auto &wire : wire_map){
     if(wire){
       wire->CheckIfHasEnergy(energy_map);

@@ -12,7 +12,7 @@ mouse_position_in_world{0.0f,0.0f}
 ,keys_up{false}
 ,keymap{kKey_None},
 delay_between_key_press(100),
-rotate_left_key_press_timer(0){
+rotate_key_press_timer(0){
   keymap[SDL_SCANCODE_S] = kKey_Down;
   keymap[SDL_SCANCODE_D] = kKey_Right;
   keymap[SDL_SCANCODE_A] = kKey_Left;
@@ -30,8 +30,8 @@ bool Input::PollEvents(GameData& game_data, Engine& engine) {
   mouse_position_in_world.x = mouse_position_in_window.x + engine.camera.x;
   mouse_position_in_world.y = mouse_position_in_window.y + engine.camera.y;
   
-  if(rotate_left_key_press_timer < delay_between_key_press) {
-    rotate_left_key_press_timer += g_delta_t;
+  if(rotate_key_press_timer < delay_between_key_press) {
+    rotate_key_press_timer += g_delta_t;
   }
     
   while (SDL_PollEvent(&e) != 0) {
@@ -59,10 +59,17 @@ bool Input::PollEvents(GameData& game_data, Engine& engine) {
   }
   
   if(keys_down[kKey_Rotate_Left]){
-    if(rotate_left_key_press_timer < delay_between_key_press) {
+    if(rotate_key_press_timer < delay_between_key_press) {
       keys_down[kKey_Rotate_Left] = false;
     } else {
-      rotate_left_key_press_timer = 0;
+      rotate_key_press_timer = 0;
+    }
+  } 
+  if(keys_down[kKey_Rotate_Right]){
+    if(rotate_key_press_timer < delay_between_key_press) {
+      keys_down[kKey_Rotate_Right] = false;
+    } else {
+      rotate_key_press_timer = 0;
     }
   } 
   Vecf movement = game_data.ReceiveInput(keys_down, 

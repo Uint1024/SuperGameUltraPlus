@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "SDL.h"
 #include "engine.h"
 #include "sprite_data.h"
@@ -6,7 +8,7 @@
 StaticBody::StaticBody(const Vecf& position, const Veci& size, 
         const eTexture texture_id, const eDirection direction) :
 SolidBody(position, size, texture_id, direction){
-
+  
 }
 
 void StaticBody::Render(Engine& engine) {
