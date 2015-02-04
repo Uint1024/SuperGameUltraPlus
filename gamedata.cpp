@@ -4,6 +4,7 @@
 #include "wire.h"
 #include "and_gate.h"
 #include "constant_1.h"
+#include "not_gate.h"
 #include <memory>
 
 GameData::GameData(const Veci& window_size) :
@@ -119,9 +120,11 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
             0, map_size);
   }
   
-  if(keys_down[kKey_Or]){
+  if(keys_down[kKey_Not]){
     Clean();
-    currently_selected_object = kEditorObject_Or;
+    currently_selected_object = kEditorObject_Not;
+    temporary_gate = new NotGate(grid_position_position, kDirection_Down,
+            0, map_size);
   }
    if(keys_down[kKey_Wire]){
     currently_selected_object = kEditorObject_Wire;
@@ -136,20 +139,15 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
     temporary_gate->body->bbox.MoveTo(grid_position_position);
   }
   
-  /*if(currently_selected_object == kEditorObject_Constant_1 || 
-                  currently_selected_object == kEditorObject_And ||
-                  currently_selected_object == kEditorObject_Or){
-    if(mouse_buttons_down[SDL_BUTTON_LEFT]){
-        battery_map.push_back(new LogicGate(grid_position_position,
-                  currently_selected_object, kDirection_Down,
-                position_in_vector, map_size, wire_map));
-    }*/
   if(mouse_buttons_down[SDL_BUTTON_LEFT]){
     if(currently_selected_object == kEditorObject_And) {
       logic_gate_map.push_back(new AndGate(grid_position_position, kDirection_Down,
              position_in_vector, map_size));
     } else if(currently_selected_object == kEditorObject_Constant_1){
       logic_gate_map.push_back(new Constant_1(grid_position_position, kDirection_Down,
+             position_in_vector, map_size));
+    } else if(currently_selected_object == kEditorObject_Not){
+      logic_gate_map.push_back(new NotGate(grid_position_position, kDirection_Down,
              position_in_vector, map_size));
     } else if(currently_selected_object == kEditorObject_Wire) {
 
@@ -194,7 +192,6 @@ GameData::Update() {
     
   for(int i = 0 ; i < energy_map.size() ; i++){
     if(energy_map[i]){
-      //std::cout << "position :" << i << std::endl;
       Energy* energy = energy_map[i];
       if(wire_map[i]){
         
@@ -205,7 +202,6 @@ GameData::Update() {
             temporary_energy_map[i + map_size.x] = energy;
             break;
           case kDirection_Right:
-            //std::cout << i << std::endl;
             temporary_energy_map[i+1] = energy;
             break;
           case kDirection_Left:
@@ -221,50 +217,6 @@ GameData::Update() {
   }
   
   energy_map = temporary_energy_map;
-  
-  
-  /*for(int i = 0 ; i < energy_map.size() ; i++){
-    if(energy_map[i]){
-      //std::cout << "position :" << i << std::endl;
-      Energy* energy = energy_map[i];
-      if(wire_map[i]){
-        
-        Wire* wire = wire_map[i];
-        
-        switch(wire->body->direction){
-          case kDirection_Down:
-            if(energy_map[i + map_size.x]){
-              //do nothing
-              //delete energy_map[i + map_size.x];
-            } else {
-              energy_map[i] = nullptr;
-              energy_map[i + map_size.x] = energy;
-            }
-            break;
-          case kDirection_Right:
-            if(energy_map[++i]) {
-              delete energy_map[++i];
-            }
-            energy_map[++i] = energy;
-            break;
-          case kDirection_Left:
-            if(energy_map[--i]) {
-              delete energy_map[--i];
-            }
-            energy_map[--i] = energy;
-            break;
-          case kDirection_Up:
-            if (energy_map[i - map_size.y]) {
-              delete energy_map[i - map_size.y];
-            }
-            energy_map[i - map_size.y] = energy;
-            break;
-        }
-        
-        energy_map[i] = nullptr;
-      }
-    }
-  }*/
   
   for(auto &logic_gate : logic_gate_map){
     if(logic_gate){

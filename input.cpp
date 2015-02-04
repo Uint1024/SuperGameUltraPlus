@@ -19,7 +19,7 @@ rotate_key_press_timer(0){
   keymap[SDL_SCANCODE_W] = kKey_Up;
   keymap[SDL_SCANCODE_1] = kKey_Wire;
   keymap[SDL_SCANCODE_2] = kKey_And;
-  keymap[SDL_SCANCODE_3] = kKey_Or;
+  keymap[SDL_SCANCODE_3] = kKey_Not;
   keymap[SDL_SCANCODE_4] = kKey_Constant_1;
   keymap[SDL_SCANCODE_Q] = kKey_Rotate_Left;
   keymap[SDL_SCANCODE_E] = kKey_Rotate_Right;

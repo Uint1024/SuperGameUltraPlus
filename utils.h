@@ -21,7 +21,7 @@ void AddVecf(const Vecf& to_add, Vecf* base);
 
 enum eEditorObject {
   kEditorObject_And,
-  kEditorObject_Or,
+  kEditorObject_Not,
   kEditorObject_Wire,
   kEditorObject_Constant_1,
   kEditorObject_Constant_0,
@@ -48,7 +48,7 @@ enum eKey {
   kKey_Right,
   kKey_Wire,
   kKey_And,
-  kKey_Or,
+  kKey_Not,
   kKey_Constant_1,
   kKey_Constant_0,
   kKey_Inventory,
@@ -83,7 +83,7 @@ enum eLogicalState {
 enum eTexture {
   kTexture_Player,
   kTexture_And,
-  kTexture_Or,
+  kTexture_Not,
   kTexture_Wire_Empty,
   kTexture_Wire_1,
   kTexture_Wire_0,
