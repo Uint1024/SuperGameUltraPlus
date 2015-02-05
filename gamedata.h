@@ -33,6 +33,7 @@ struct GameData{
   std::vector<LogicGate*> battery_map;
   std::vector<LogicGate*> logic_gate_map;
   std::vector<Wire*> wire_map;
+  std::vector<Wire*> temporary_wire_map_blueprints;
   eEditorObject currently_selected_object;
   Veci mouse_grid_position;
   Vecf grid_position_position;
@@ -40,7 +41,11 @@ struct GameData{
   LogicGate* temporary_gate;
   Wire* temporary_wire;
   eDirection temporary_rotation;
-
+  bool mouse_button_pressed_last_frame;
+  bool keeping_mouse_pressed;
+  Veci mouse_selection_grid_position_begin;
+  Veci mouse_selection_grid_position_end;
+  bool selecting_area;
 };
 
 #endif	/* GAMEDATA_H */

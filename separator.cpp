@@ -1,3 +1,4 @@
+#include <iostream>
 #include "separator.h"
 #include "and_gate.h"
 #include "energy.h"
@@ -7,9 +8,27 @@ Separator::Separator(const Vecf& position,
         const Veci& map_size) :
 LogicGate(position, direction, position_in_array, map_size, kTexture_Separator,
         Veci{48,48}){
-  output_position_in_map_grid[0] = position_in_array + map_size.x * 3;
-  output_position_in_map_grid[1] = position_in_array + map_size.x * 3 + 2;
-  input_position_in_map_grid[0] = position_in_array + 1;
+    if(direction == kDirection_Down) {
+      output_position_in_map_grid[0] = position_in_array + map_size.x * 3;
+      output_position_in_map_grid[1] = position_in_array + map_size.x * 3 + 2;
+      input_position_in_map_grid[0] = position_in_array + 1;
+    }
+    if(direction == kDirection_Left) {
+      
+      output_position_in_map_grid[0] = position_in_array - 1;
+      output_position_in_map_grid[1] = position_in_array + map_size.x * 2 - 1;
+      input_position_in_map_grid[0] = position_in_array + map_size.x + 2;
+    }
+    if(direction == kDirection_Right) {
+      output_position_in_map_grid[0] = position_in_array + 3;
+      output_position_in_map_grid[1] = position_in_array + map_size.x * 2 + 3;
+      input_position_in_map_grid[0] = position_in_array + map_size.x;
+    }
+    if(direction == kDirection_Up) {
+      output_position_in_map_grid[0] = position_in_array - map_size.x ;
+      output_position_in_map_grid[1] = position_in_array - map_size.x  + 2;
+      input_position_in_map_grid[0] = position_in_array + map_size.x * 2 + 1;
+    }
 }
 
 void Separator::RunLogic(std::vector<Energy*>& energy_map) {

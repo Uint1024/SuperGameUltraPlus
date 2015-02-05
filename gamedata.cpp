@@ -13,11 +13,17 @@ player(Vecf{window_size.x/2.0f, window_size.y/2.0f}),
 map_size{100,100},
 currently_selected_object(kEditorObject_None),
 temporary_gate(nullptr),
-temporary_wire(nullptr),
-temporary_rotation(kDirection_Down){
+temporary_wire(nullptr)
+,selecting_area(false)
+,temporary_rotation(kDirection_Down){
   wire_map.reserve(map_size.x * map_size.y);
   for(int i = 0 ; i < map_size.x * map_size.y ; ++i){
     wire_map.push_back(nullptr);
+  }
+  
+  temporary_wire_map_blueprints.reserve(map_size.x * map_size.y);
+  for(int i = 0 ; i < map_size.x * map_size.y ; ++i){
+    temporary_wire_map_blueprints.push_back(nullptr);
   }
   
   energy_map.reserve(map_size.x * map_size.y);
@@ -46,6 +52,12 @@ GameData::Render(Engine& engine) {
     }
   }
   
+  for(auto &wire : temporary_wire_map_blueprints){  
+    if(wire){
+      wire->body->Render(engine);
+    }
+  }
+  
   for(auto &logic_gate : battery_map){
     if(logic_gate){
       logic_gate->body->Render(engine);
@@ -69,6 +81,8 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
                         const Veci& mouse_position_in_window,
                         const Vecf& mouse_position_in_world) {
 
+
+  
   //position of the mouse on the map grid, so {5, 10} is the 5th column, 10th row
   mouse_grid_position = {static_cast<int>(mouse_position_in_world.x)/16,
                          static_cast<int>(mouse_position_in_world.y)/16};
@@ -78,8 +92,161 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
   
   int position_in_vector = 
                   mouse_grid_position.x + mouse_grid_position.y * map_size.x;
-
   
+  if(!keeping_mouse_pressed &&
+          mouse_buttons_down[SDL_BUTTON_LEFT] && 
+          mouse_button_pressed_last_frame){
+    mouse_selection_grid_position_begin = mouse_grid_position;
+    keeping_mouse_pressed = true;
+  }
+  
+  if(keeping_mouse_pressed && 
+          (mouse_selection_grid_position_begin.x != mouse_grid_position.x ||
+          mouse_selection_grid_position_begin.y != mouse_grid_position.y)) {
+    selecting_area = true;
+  }
+  if(keeping_mouse_pressed && selecting_area &&
+          currently_selected_object == kEditorObject_Wire){
+    for(auto &temp_wire : temporary_wire_map_blueprints){
+      delete temp_wire;
+      temp_wire = nullptr;
+    }
+    
+    delete temporary_wire;
+    temporary_wire = nullptr;
+    
+    //calculating distance from origin of selection to know
+    //direction of slide
+    int diff_x = mouse_grid_position.x - mouse_selection_grid_position_begin.x;
+    int diff_y = mouse_grid_position.y - mouse_selection_grid_position_begin.y;
+    //std::cout << diff_x << " " << diff_y << std::endl;
+    if(diff_x >= 0 && diff_y >= 0){
+      if(diff_x > diff_y){
+        temporary_rotation = kDirection_Right;
+        for(int i = mouse_selection_grid_position_begin.x ;
+                i <= mouse_grid_position.x ;
+                ++i){
+          int position_in_vector = 
+                  i + mouse_selection_grid_position_begin.y * map_size.x;
+          Vecf real_position = { static_cast<float>(i) * 16,  
+                             static_cast<float>(mouse_selection_grid_position_begin.y) * 16 };
+          temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+                  position_in_vector, temporary_rotation);
+        }
+      }
+      else{
+        temporary_rotation = kDirection_Down;
+        for(int i = mouse_selection_grid_position_begin.y ;
+                i <= mouse_grid_position.y ;
+                ++i){
+          int position_in_vector = 
+                  mouse_selection_grid_position_begin.x + i * map_size.x;
+          Vecf real_position = { static_cast<float>(mouse_selection_grid_position_begin.x) * 16,  
+                             static_cast<float>(i) * 16 };
+          temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+                  position_in_vector, temporary_rotation);
+        }
+      }
+    }
+    if(diff_x <= 0 && diff_y >= 0){
+      if(abs(diff_x) > diff_y){
+        temporary_rotation = kDirection_Left;
+        for(int i = mouse_selection_grid_position_begin.x ;
+                i >= mouse_grid_position.x ;
+                --i){
+          int position_in_vector = 
+                  i + mouse_selection_grid_position_begin.y * map_size.x;
+          Vecf real_position = { static_cast<float>(i) * 16,  
+                             static_cast<float>(mouse_selection_grid_position_begin.y) * 16 };
+          temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+                  position_in_vector, temporary_rotation);
+        }
+      }
+      else{
+        temporary_rotation = kDirection_Down;
+        for(int i = mouse_selection_grid_position_begin.y ;
+                i <= mouse_grid_position.y ;
+                ++i){
+          int position_in_vector = 
+                  mouse_selection_grid_position_begin.x + i * map_size.x;
+          Vecf real_position = { static_cast<float>(mouse_selection_grid_position_begin.x) * 16,  
+                             static_cast<float>(i) * 16 };
+          temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+                  position_in_vector, temporary_rotation);
+        }
+      }
+    }
+    if(diff_x <= 0 && diff_y <= 0){
+      if(abs(diff_x) > abs(diff_y)){
+        temporary_rotation = kDirection_Left;
+        for(int i = mouse_selection_grid_position_begin.x ;
+                i >= mouse_grid_position.x ;
+                --i){
+          int position_in_vector = 
+                  i + mouse_selection_grid_position_begin.y * map_size.x;
+          Vecf real_position = { static_cast<float>(i) * 16,  
+                             static_cast<float>(mouse_selection_grid_position_begin.y) * 16 };
+          temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+                  position_in_vector, temporary_rotation);
+        }
+      }
+      else{
+        temporary_rotation = kDirection_Up;
+        for(int i = mouse_selection_grid_position_begin.y ;
+                i >= mouse_grid_position.y ;
+                --i){
+          int position_in_vector = 
+                  mouse_selection_grid_position_begin.x + i * map_size.x;
+          Vecf real_position = { static_cast<float>(mouse_selection_grid_position_begin.x) * 16,  
+                             static_cast<float>(i) * 16 };
+          temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+                  position_in_vector, temporary_rotation);
+        }
+      }
+    }
+    if(diff_x >= 0 && diff_y <= 0){
+      if(diff_x > abs(diff_y)){
+        temporary_rotation = kDirection_Right;
+        for(int i = mouse_selection_grid_position_begin.x ;
+                i <= mouse_grid_position.x ;
+                ++i){
+          int position_in_vector = 
+                  i + mouse_selection_grid_position_begin.y * map_size.x;
+          Vecf real_position = { static_cast<float>(i) * 16,  
+                             static_cast<float>(mouse_selection_grid_position_begin.y) * 16 };
+          temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+                  position_in_vector, temporary_rotation);
+        }
+      }
+      else{
+        temporary_rotation = kDirection_Up;
+        for(int i = mouse_selection_grid_position_begin.y ;
+                i >= mouse_grid_position.y ;
+                --i){
+          int position_in_vector = 
+                  mouse_selection_grid_position_begin.x + i * map_size.x;
+          Vecf real_position = { static_cast<float>(mouse_selection_grid_position_begin.x) * 16,  
+                             static_cast<float>(i) * 16 };
+          temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+                  position_in_vector, temporary_rotation);
+        }
+      }
+    }
+    
+
+    
+    if(temporary_wire){
+      Clean();
+      temporary_wire = new Wire(grid_position_position, 0, temporary_rotation);
+    }
+    
+    
+  }
+  
+  if(!selecting_area && currently_selected_object == kEditorObject_Wire 
+          && !temporary_wire){
+     temporary_wire = new Wire(grid_position_position, 0, temporary_rotation);
+  }
   
   bool pressed_rotation_key = false;
   if(keys_down[kKey_Rotate_Left]){
@@ -102,6 +269,13 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
       Clean();
       temporary_wire = new Wire(grid_position_position, 0, temporary_rotation);
     }
+    if(temporary_gate){
+      Clean();
+      if(currently_selected_object == kEditorObject_Separator){
+        temporary_gate = new Separator(grid_position_position, temporary_rotation,
+            0, map_size);
+      }
+    }
   }
   
   
@@ -111,8 +285,6 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
     temporary_gate = new Constant_1(grid_position_position,
             kDirection_Down, 0, map_size);
   }
-  
-  
   
   if(keys_down[kKey_And]){
     Clean();
@@ -147,7 +319,9 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
     temporary_gate->body->bbox.MoveTo(grid_position_position);
   }
   
-  if(mouse_buttons_down[SDL_BUTTON_LEFT]){
+
+  
+  if(!selecting_area && mouse_buttons_down[SDL_BUTTON_LEFT]){
     if(currently_selected_object == kEditorObject_And) {
       logic_gate_map.push_back(new AndGate(grid_position_position, kDirection_Down,
              position_in_vector, map_size));
@@ -158,25 +332,30 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
       logic_gate_map.push_back(new NotGate(grid_position_position, kDirection_Down,
              position_in_vector, map_size));
     } else if(currently_selected_object == kEditorObject_Separator){
-      logic_gate_map.push_back(new Separator(grid_position_position, kDirection_Down,
+      logic_gate_map.push_back(new Separator(grid_position_position, temporary_rotation,
              position_in_vector, map_size));
     } else if(currently_selected_object == kEditorObject_Wire) {
-
-        std::cout << position_in_vector << std::endl;
         delete wire_map[position_in_vector];
         wire_map[position_in_vector] = nullptr;
         wire_map[position_in_vector] = new Wire(grid_position_position,
                   position_in_vector, temporary_rotation);
-
     }
   }
+  
   if(mouse_buttons_down[SDL_BUTTON_RIGHT]){ 
     for(int i = 0 ; i < wire_map.size() ; i++){
       if(wire_map[i]){
-        
         if(wire_map[i]->body->bbox.CollisionWithPoint(mouse_position_in_world)){
           delete wire_map[i];
           wire_map[i] = nullptr;
+        }
+      }
+    }
+    for(auto &logic_gate : logic_gate_map){
+      if(logic_gate){
+        if(logic_gate->body->bbox.CollisionWithPoint(mouse_position_in_world)){
+          delete logic_gate;
+          logic_gate = nullptr;
         }
       }
     }
@@ -184,6 +363,23 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
   }
   Vecf player_movement = player.ReceiveInput(keys_down, mouse_buttons_down);
   
+  
+  if(mouse_buttons_down[SDL_BUTTON_LEFT]){
+    mouse_button_pressed_last_frame = true;
+  }
+  else{
+    //we let go of the button, we can create the temporary objects
+    mouse_button_pressed_last_frame = false;
+    keeping_mouse_pressed = false;
+    selecting_area = false;
+    
+    for(int i = 0 ; i < temporary_wire_map_blueprints.size() ; i++){
+      if(temporary_wire_map_blueprints[i]){
+        wire_map[i] = temporary_wire_map_blueprints[i];
+        temporary_wire_map_blueprints[i] = nullptr;
+      }
+    }
+  }
   return player_movement;
 }
 
@@ -191,6 +387,7 @@ void
 GameData::Update() {  
   for(auto &wire : wire_map){
     if(wire){
+      std::cout << wire->position_in_array << std::endl;
       wire->CheckIfHasEnergy(energy_map);
     }
   }
