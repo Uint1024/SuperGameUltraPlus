@@ -5,6 +5,7 @@
 #include "and_gate.h"
 #include "constant_1.h"
 #include "not_gate.h"
+#include "separator.h"
 #include <memory>
 
 GameData::GameData(const Veci& window_size) :
@@ -132,6 +133,13 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
     temporary_wire = new Wire(grid_position_position, 0, temporary_rotation);
   }
   
+  if(keys_down[kKey_Separator]){
+    Clean();
+    currently_selected_object = kEditorObject_Separator;
+    temporary_gate = new Separator(grid_position_position, kDirection_Down,
+            0, map_size);
+  }
+  
   if(temporary_wire){
     temporary_wire->body->bbox.MoveTo(grid_position_position);
   }
@@ -148,6 +156,9 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
              position_in_vector, map_size));
     } else if(currently_selected_object == kEditorObject_Not){
       logic_gate_map.push_back(new NotGate(grid_position_position, kDirection_Down,
+             position_in_vector, map_size));
+    } else if(currently_selected_object == kEditorObject_Separator){
+      logic_gate_map.push_back(new Separator(grid_position_position, kDirection_Down,
              position_in_vector, map_size));
     } else if(currently_selected_object == kEditorObject_Wire) {
 
@@ -194,9 +205,7 @@ GameData::Update() {
     if(energy_map[i]){
       Energy* energy = energy_map[i];
       if(wire_map[i]){
-        
         Wire* wire = wire_map[i];
-        
         switch(wire->body->direction){
           case kDirection_Down:
             temporary_energy_map[i + map_size.x] = energy;
@@ -212,6 +221,8 @@ GameData::Update() {
             temporary_energy_map[i - map_size.y] = energy;
             break;
         }
+        
+        
       }
     }
   }

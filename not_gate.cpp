@@ -2,9 +2,9 @@
 #include "energy.h"
 NotGate::NotGate(const Vecf& position, const eDirection direction, 
         const int position_in_array, const Veci& map_size):
-LogicGate(position, direction, position_in_array, map_size, kTexture_Not) {
-  output_position_in_map_grid = position_in_array + map_size.x * 3 + 1;
-  input_position_in_map_grid[0] = position_in_array + 1;
+LogicGate(position, direction, position_in_array, map_size, kTexture_Not, Veci{16,48}) {
+  output_position_in_map_grid[0] = position_in_array + map_size.x * 3;
+  input_position_in_map_grid[0] = position_in_array;
 }
 
 void 

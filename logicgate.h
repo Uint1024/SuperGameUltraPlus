@@ -20,7 +20,8 @@ class Energy;
 struct LogicGate {
   LogicGate(const Vecf& position,
             const eDirection direction, const int position_in_array,
-            const Veci& map_size, const eTexture texture_id);
+            const Veci& map_size, const eTexture texture_id,
+            const Veci& size);
   void CheckOutputToWires(std::vector<Energy*>& energy_map, const Veci& map_size);
   SolidBody* body;
   eGateType type;
@@ -36,7 +37,7 @@ struct LogicGate {
   //this is the top left corner of the gate in the map grid
   int position_in_map_grid;
   //position of the wire it will output to
-  int output_position_in_map_grid;
+  int output_position_in_map_grid[2];
   int input_position_in_map_grid[2];
 };
 

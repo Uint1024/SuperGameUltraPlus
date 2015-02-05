@@ -25,6 +25,7 @@ enum eEditorObject {
   kEditorObject_Wire,
   kEditorObject_Constant_1,
   kEditorObject_Constant_0,
+  kEditorObject_Separator,
   kEditorObject_None,
   kEditorObject_Count
 };
@@ -51,6 +52,7 @@ enum eKey {
   kKey_Not,
   kKey_Constant_1,
   kKey_Constant_0,
+  kKey_Separator,
   kKey_Inventory,
   kKey_Workshop,
   kKey_Copy,
@@ -89,6 +91,7 @@ enum eTexture {
   kTexture_Wire_0,
   kTexture_Constant_1,
   kTexture_Constant_0,
+  kTexture_Separator,
   kTexture_None,
   kTexture_Count
 };
