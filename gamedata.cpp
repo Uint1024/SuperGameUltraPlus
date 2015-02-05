@@ -26,10 +26,19 @@ temporary_wire(nullptr)
     temporary_wire_map_blueprints.push_back(nullptr);
   }
   
-  energy_map.reserve(map_size.x * map_size.y);
+  /*energy_map.reserve(map_size.x * map_size.y);
   for(int i = 0 ; i < map_size.x * map_size.y ; ++i){
-    energy_map.push_back(nullptr);
+    //energy_map.push_back(nullptr);
+    energy_map[i][0] = nullptr;
+    energy_map[i][1] = nullptr;
+    energy_map[i][2] = nullptr;
+    energy_map[i][3] = nullptr;
+  }*/
+  for(int i = 0 ; i < map_size.x * map_size.y ; ++i){
+    energy_map.push_back(std::array<Energy*, 4>{nullptr});
   }
+  
+  std::cout << energy_map[301][1] << std::endl;
  
 }
 
@@ -432,39 +441,49 @@ GameData::Update() {
     }
   }
   
-  std::vector<Energy*> temporary_energy_map;
-  temporary_energy_map.reserve(map_size.x * map_size.y);
+  std::vector<std::array<Energy*, 4>> temporary_energy_map;
   for(int i = 0 ; i < map_size.x * map_size.y ; ++i){
-    temporary_energy_map.push_back(nullptr);
+    temporary_energy_map.push_back(std::array<Energy*, 4>{nullptr});
   }
     
+  //todo: fix memory leak!
   for(int i = 0 ; i < energy_map.size() ; i++){
-    if(energy_map[i]){
-      Energy* energy = energy_map[i];
       if(wire_map[i]){
         Wire* wire = wire_map[i];
+        
         switch(wire->body->direction){
           case kDirection_Down:
-            temporary_energy_map[i + map_size.x] = energy;
+            temporary_energy_map[i + map_size.x][kDirection_Down] = new Energy(wire->logical_state);
+            std::cout << i + map_size.x << std::endl;
             break;
           case kDirection_Right:
-            temporary_energy_map[i+1] = energy;
+            temporary_energy_map[i+1][kDirection_Right] = new Energy(wire->logical_state);
             break;
           case kDirection_Left:
             
-            temporary_energy_map[i-1] = energy;
+            temporary_energy_map[i-1][kDirection_Left] = new Energy(wire->logical_state);
             break;
           case kDirection_Up:
-            temporary_energy_map[i - map_size.y] = energy;
+            temporary_energy_map[i - map_size.y][kDirection_Up] = new Energy(wire->logical_state);
             break;
         }
-        
-        
+        delete energy_map[i][0];
+        delete energy_map[i][1];
+        delete energy_map[i][2];
+        delete energy_map[i][3];
+        energy_map[i][0] = nullptr;
+        energy_map[i][1] = nullptr;
+        energy_map[i][2] = nullptr;
+        energy_map[i][3] = nullptr;
       }
-    }
+      else {
+        
+        //temporary_energy_map[i] = energy_map[i];
+      }
   }
   
   energy_map = temporary_energy_map;
+  //std::cout << energy_map[301][1] << wire_map[301] << std::endl;
   
   for(auto &logic_gate : logic_gate_map){
     if(logic_gate){

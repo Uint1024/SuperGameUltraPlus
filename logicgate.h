@@ -22,11 +22,11 @@ struct LogicGate {
             const eDirection direction, const int position_in_array,
             const Veci& map_size, const eTexture texture_id,
             const Veci& size);
-  void CheckOutputToWires(std::vector<Energy*>& energy_map, const Veci& map_size);
+  void CheckOutputToWires(std::vector<std::array<Energy*, 4>>& energy_map, const Veci& map_size);
   SolidBody* body;
   eGateType type;
   eLogicalState logical_state;
-  virtual void RunLogic(std::vector<Energy*>& energy_map) = 0;
+  virtual void RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) = 0;
   /*Bbox* input_bbox[2];
   Bbox* output_bbox;*/
   //each logic gate is a 3*3, each cell can be an output, an input, or neutral
@@ -39,6 +39,7 @@ struct LogicGate {
   //position of the wire it will output to
   int output_position_in_map_grid[2];
   int input_position_in_map_grid[2];
+  eDirection output_direction;
 };
 
 #endif	/* LOGICGATE_H */

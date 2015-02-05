@@ -20,6 +20,7 @@ void StaticBody::Render(Engine& engine) {
           bbox.size.x, 
           bbox.size.y};
   SDL_Rect* src_rect =  &data->src_rect[sprite.current_frame];
+  
   int angle = 0;
   switch(direction){
     case kDirection_Left:

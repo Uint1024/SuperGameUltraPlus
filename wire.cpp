@@ -4,6 +4,7 @@
 #include "energy.h"
 
 #include "static_body.h"
+#include "logicgate.h"
 Wire::Wire(const Vecf& position, const int position_in_array, 
         const eDirection direction) :
 body(new StaticBody(position, Veci{16,16}, kTexture_Wire_Empty, direction)),
@@ -15,33 +16,66 @@ visited(false){
 }
 
 void 
-Wire::CheckIfHasEnergy(std::vector<Energy*> energy_map) {
+Wire::CheckIfHasEnergy(std::vector<std::array<Energy*, 4>>& energy_map) {
+  //check which energy types are present on the cell
+  //if there are multiple types (ie 0 and 1), then we choose one at random...
   
-  if(energy_map[position_in_array]){
-    logical_state = energy_map[position_in_array]->state;
-    switch(logical_state){
-      case kLogicalState_0:
-        body->sprite.texture_id = kTexture_Wire_0;
-        break;
-      case kLogicalState_1:
-        body->sprite.texture_id = kTexture_Wire_1;
-        break;
-      case kLogicalState_Empty:
-        body->sprite.texture_id = kTexture_Wire_Empty;
-        break;
-      default:
-        std::cout << "Error, unknown state." << std::endl;
-        break;
+  //std::array<Energy*, 4>& energy_array = energy_map[position_in_array];
+  bool has_high_energy = false;
+  bool has_low_energy = false;
+  
+  for(int i = 0 ; i < 4 ; i++) {
+    if(energy_map[position_in_array][i]) {
+      
+      if(energy_map[position_in_array][i]->state == kLogicalState_0) {
+        has_low_energy = true;
+      }
+      if(energy_map[position_in_array][i]->state == kLogicalState_1) {
+        
+        has_high_energy = true;
+      }
+      if(energy_map[position_in_array][i]->state == kLogicalState_Error) {
+        has_high_energy = true;
+        has_low_energy = true;
+      }
     }
-  } else {
+  }
+  
+  if(has_high_energy && !has_low_energy) {
+    logical_state = kLogicalState_1;
+  }
+  else if(!has_high_energy && has_low_energy) {
+    logical_state = kLogicalState_0;
+  }
+  else if(has_high_energy && has_low_energy) {
+    logical_state = kLogicalState_Error;
+  }
+  else if(!has_high_energy && ! has_low_energy) {
     logical_state = kLogicalState_Empty;
-    body->sprite.texture_id = kTexture_Wire_Empty;
+  }
+  
+  switch(logical_state){
+    case kLogicalState_0:
+      body->sprite.texture_id = kTexture_Wire_0;
+      break;
+    case kLogicalState_1:
+      body->sprite.texture_id = kTexture_Wire_1;
+      break;
+    case kLogicalState_Empty:
+      body->sprite.texture_id = kTexture_Wire_Empty;
+      break;
+    case kLogicalState_Error:
+      body->sprite.texture_id = kTexture_Wire_Error;
+      break;
+    default:
+      std::cout << "Error, unknown state." << std::endl;
+      break;
   }
 }
 
 
 void 
-Wire::MoveElectrons(std::vector<Wire*> wire_map, const Veci& map_size) {
+Wire::MoveElectrons(std::vector<Wire*>& wire_map, const Veci& map_size) {
   Wire* wire_to_send_to = nullptr;
   switch(body->direction){
     case kDirection_Right:
@@ -138,7 +172,7 @@ Wire::ChangeState(Wire* parent, eLogicalState state,
 }
 
 void 
-Wire::CheckOutputToWire(std::vector<Wire*> wire_map) {
+Wire::CheckOutputToWire(std::vector<Wire*>& wire_map) {
   
 }
 

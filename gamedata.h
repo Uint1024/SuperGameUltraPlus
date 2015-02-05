@@ -9,6 +9,8 @@
 #define	GAMEDATA_H
 
 #include <vector>
+#include <array>
+#include <list>
 #include "logicgate.h"
 #include "energy.h"
 
@@ -29,7 +31,8 @@ struct GameData{
   void ResetWiresVisitedState();
   Player player;
   Veci map_size;
-  std::vector<Energy*> energy_map;
+  //grid of energy, each cell can have 4 "energy" objects, 1 from each direction
+  std::vector<std::array<Energy*, 4>> energy_map;
   std::vector<LogicGate*> battery_map;
   std::vector<LogicGate*> logic_gate_map;
   std::vector<Wire*> wire_map;

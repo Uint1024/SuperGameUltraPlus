@@ -79,6 +79,7 @@ enum eLogicalState {
   kLogicalState_1,
   kLogicalState_0,
   kLogicalState_Empty,
+  kLogicalState_Error,
   kLogicalState_Count
 };
 
@@ -89,6 +90,7 @@ enum eTexture {
   kTexture_Wire_Empty,
   kTexture_Wire_1,
   kTexture_Wire_0,
+  kTexture_Wire_Error,
   kTexture_Constant_1,
   kTexture_Constant_0,
   kTexture_Separator,

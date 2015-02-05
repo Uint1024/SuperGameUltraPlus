@@ -8,6 +8,7 @@
 #ifndef WIRE_H
 #define	WIRE_H
 #include <vector>
+#include <array>
 #include "solid_body.h"
 
 class Engine;
@@ -18,9 +19,9 @@ struct Wire {
   void ChangeState (Wire* parent, eLogicalState state, 
                       std::vector<Wire*>& wire_map,
                       const Veci& map_size);
-  void CheckOutputToWire(std::vector<Wire*> wire_map);
-  void MoveElectrons(std::vector<Wire*> wire_map, const Veci& map_size);
-  void CheckIfHasEnergy(std::vector<Energy*> energy_map);
+  void CheckOutputToWire(std::vector<Wire*>& wire_map);
+  void MoveElectrons(std::vector<Wire*>& wire_map, const Veci& map_size);
+  void CheckIfHasEnergy(std::vector<std::array<Energy*, 4>>& energy_map);
   void ResetState();
   int position_in_array;
   SolidBody* body;

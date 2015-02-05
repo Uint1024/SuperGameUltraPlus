@@ -31,8 +31,8 @@ LogicGate(position, direction, position_in_array, map_size, kTexture_Separator,
     }
 }
 
-void Separator::RunLogic(std::vector<Energy*>& energy_map) {
-  if(energy_map[input_position_in_map_grid[0]]){
+void Separator::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
+  /*if(energy_map[input_position_in_map_grid[0]]){
     logical_state = energy_map[input_position_in_map_grid[0]]->state;
   }
   else{
@@ -40,6 +40,6 @@ void Separator::RunLogic(std::vector<Energy*>& energy_map) {
   }
 
   delete energy_map[input_position_in_map_grid[0]];
-  energy_map[input_position_in_map_grid[0]] = nullptr;
+  energy_map[input_position_in_map_grid[0]] = nullptr;*/
 }
 
