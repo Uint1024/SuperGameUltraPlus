@@ -38,8 +38,8 @@ Bbox::CollisionWithPoint(const Vecf& point) {
 
 bool 
 Bbox::CollisionWithBbox(const Bbox& other) {
-  if(other.left <= right && other.bottom >= top && 
-          other.right >= left && other.top <= bottom){
+  if(other.left < right && other.bottom > top && 
+          other.right > left && other.top < bottom){
     return true;
   }
   

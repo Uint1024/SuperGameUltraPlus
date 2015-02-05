@@ -105,6 +105,7 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
           mouse_selection_grid_position_begin.y != mouse_grid_position.y)) {
     selecting_area = true;
   }
+  
   if(keeping_mouse_pressed && selecting_area &&
           currently_selected_object == kEditorObject_Wire){
     for(auto &temp_wire : temporary_wire_map_blueprints){
@@ -322,23 +323,54 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
 
   
   if(!selecting_area && mouse_buttons_down[SDL_BUTTON_LEFT]){
-    if(currently_selected_object == kEditorObject_And) {
-      logic_gate_map.push_back(new AndGate(grid_position_position, kDirection_Down,
-             position_in_vector, map_size));
-    } else if(currently_selected_object == kEditorObject_Constant_1){
-      logic_gate_map.push_back(new Constant_1(grid_position_position, kDirection_Down,
-             position_in_vector, map_size));
-    } else if(currently_selected_object == kEditorObject_Not){
-      logic_gate_map.push_back(new NotGate(grid_position_position, kDirection_Down,
-             position_in_vector, map_size));
-    } else if(currently_selected_object == kEditorObject_Separator){
-      logic_gate_map.push_back(new Separator(grid_position_position, temporary_rotation,
-             position_in_vector, map_size));
-    } else if(currently_selected_object == kEditorObject_Wire) {
+    bool collision = false;
+    
+    for(auto &gate : logic_gate_map){
+      if(gate){
+        if(temporary_gate){
+          collision = gate->body->bbox.CollisionWithBbox(temporary_gate->body->bbox);
+          if(collision){
+            break;
+          }
+        }
+        else if(temporary_wire){
+          collision = gate->body->bbox.CollisionWithBbox(temporary_wire->body->bbox);
+          if(collision){
+            break;
+          }
+        }
+      }
+    }
+    for(auto &wire : wire_map){
+      if(wire){
+        if(temporary_gate){
+          collision = wire->body->bbox.CollisionWithBbox(temporary_gate->body->bbox);
+          std::cout << collision << std::endl;
+          if(collision){
+            break;
+          }
+        }
+      }
+    }
+    if(!collision){
+      if(currently_selected_object == kEditorObject_And) {      
+        logic_gate_map.push_back(new AndGate(grid_position_position, kDirection_Down,
+               position_in_vector, map_size));
+      } else if(currently_selected_object == kEditorObject_Constant_1){
+        logic_gate_map.push_back(new Constant_1(grid_position_position, kDirection_Down,
+               position_in_vector, map_size));
+      } else if(currently_selected_object == kEditorObject_Not){
+        logic_gate_map.push_back(new NotGate(grid_position_position, kDirection_Down,
+               position_in_vector, map_size));
+      } else if(currently_selected_object == kEditorObject_Separator){
+        logic_gate_map.push_back(new Separator(grid_position_position, temporary_rotation,
+               position_in_vector, map_size));
+      }else if(currently_selected_object == kEditorObject_Wire) {
         delete wire_map[position_in_vector];
         wire_map[position_in_vector] = nullptr;
         wire_map[position_in_vector] = new Wire(grid_position_position,
                   position_in_vector, temporary_rotation);
+      }
     }
   }
   
@@ -387,7 +419,6 @@ void
 GameData::Update() {  
   for(auto &wire : wire_map){
     if(wire){
-      std::cout << wire->position_in_array << std::endl;
       wire->CheckIfHasEnergy(energy_map);
     }
   }
