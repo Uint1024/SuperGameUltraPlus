@@ -25,15 +25,19 @@ void StaticBody::Render(Engine& engine) {
   switch(direction){
     case kDirection_Left:
       angle = 90;
+      --dest_rect.x;
       break;
     case kDirection_Down:
       angle = 0;
       break;
     case kDirection_Right:
       angle = 270;
+      --dest_rect.y;
       break;
     case kDirection_Up:
       angle = 180;
+      --dest_rect.y;
+      --dest_rect.x;
       break;
   }
   SDL_RenderCopyEx(engine.renderer, data->texture_ptr, 

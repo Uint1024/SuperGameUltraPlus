@@ -91,7 +91,7 @@ Engine::Initialize(std::string window_name, const Veci window_size) {
   sprites_data[kTexture_Constant_1] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0);
   
-  src_rect = {{48,48,32,32}};
+  src_rect = {{96, 32, 16, 16}};
   sprites_data[kTexture_Separator] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0);
   

@@ -29,6 +29,7 @@ struct GameData{
   void Update();
   void Clean();
   void ResetWiresVisitedState();
+  void CreateTemporaryObject(const eEditorObject object_type, const Vecf& position);
   Player player;
   Veci map_size;
   //grid of energy, each cell can have 4 "energy" objects, 1 from each direction
