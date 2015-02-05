@@ -7,10 +7,10 @@ Separator::Separator(const Vecf& position,
         const eDirection direction, const int position_in_array, 
         const Veci& map_size) :
 LogicGate(position, direction, position_in_array, map_size, kTexture_Separator,
-        Veci{48,48}){
+        Veci{32,32}){
     if(direction == kDirection_Down) {
-      output_position_in_map_grid[0] = position_in_array + map_size.x * 3;
-      output_position_in_map_grid[1] = position_in_array + map_size.x * 3 + 2;
+      output_position_in_map_grid[0] = position_in_array + map_size.x * 2;
+      output_position_in_map_grid[1] = position_in_array + map_size.x * 2 +1;
       input_position_in_map_grid[0] = position_in_array + 1;
     }
     if(direction == kDirection_Left) {

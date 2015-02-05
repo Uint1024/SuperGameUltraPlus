@@ -5,10 +5,28 @@
 AndGate::AndGate(const Vecf& position,
         const eDirection direction, const int position_in_array, 
         const Veci& map_size) :
-LogicGate(position, direction, position_in_array, map_size, kTexture_And, Veci{48,48}){
-  output_position_in_map_grid[0] = position_in_array + map_size.x * 3 + 1;
-  input_position_in_map_grid[0] = position_in_array;
-  input_position_in_map_grid[1] = position_in_array + 2;
+LogicGate(position, direction, position_in_array, map_size, kTexture_And, Veci{48,16}){
+  if(direction == kDirection_Down){
+    output_position_in_map_grid[0] = position_in_array + map_size.x + 2 ;
+    input_position_in_map_grid[0] = position_in_array;
+    input_position_in_map_grid[1] = position_in_array + 1;
+  }
+  if(direction == kDirection_Left){
+    
+    output_position_in_map_grid[0] = position_in_array + map_size.x + 1 ;
+    input_position_in_map_grid[0] = position_in_array - map_size.x + 1;
+    input_position_in_map_grid[1] = position_in_array + 1;
+  }
+  if(direction == kDirection_Right){
+    output_position_in_map_grid[0] = position_in_array + map_size.x + 2 ;
+    input_position_in_map_grid[0] = position_in_array;
+    input_position_in_map_grid[1] = position_in_array + 1;
+  }
+  if(direction == kDirection_Up){
+    output_position_in_map_grid[0] = position_in_array + map_size.x + 2 ;
+    input_position_in_map_grid[0] = position_in_array;
+    input_position_in_map_grid[1] = position_in_array + 1;
+  }
 }
 
 void AndGate::RunLogic(std::vector<Energy*>& energy_map) {

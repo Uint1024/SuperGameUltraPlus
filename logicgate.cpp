@@ -29,7 +29,7 @@ LogicGate::CheckOutputToWires(std::vector<Energy*>& energy_map,
               new Energy(logical_state);
     }
   }
-  if(output_position_in_map_grid[0] != -1 &&
+  if(output_position_in_map_grid[1] != -1 &&
           !energy_map[output_position_in_map_grid[1]]){
     if(logical_state != kLogicalState_Empty){
       energy_map[output_position_in_map_grid[1]] = 

@@ -276,6 +276,15 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
         temporary_gate = new Separator(grid_position_position, temporary_rotation,
             0, map_size);
       }
+      if(currently_selected_object == kEditorObject_And){
+        temporary_gate = new AndGate(grid_position_position, temporary_rotation,
+            0, map_size);
+      }
+      if(currently_selected_object == kEditorObject_Not){
+        temporary_gate = new NotGate(grid_position_position, temporary_rotation,
+            0, map_size);
+      }
+      
     }
   }
   
@@ -290,7 +299,7 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
   if(keys_down[kKey_And]){
     Clean();
     currently_selected_object = kEditorObject_And;
-    temporary_gate = new AndGate(grid_position_position, kDirection_Down,
+    temporary_gate = new AndGate(grid_position_position, temporary_rotation,
             0, map_size);
   }
   
@@ -309,7 +318,7 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
   if(keys_down[kKey_Separator]){
     Clean();
     currently_selected_object = kEditorObject_Separator;
-    temporary_gate = new Separator(grid_position_position, kDirection_Down,
+    temporary_gate = new Separator(grid_position_position, temporary_rotation,
             0, map_size);
   }
   
@@ -354,13 +363,13 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
     }
     if(!collision){
       if(currently_selected_object == kEditorObject_And) {      
-        logic_gate_map.push_back(new AndGate(grid_position_position, kDirection_Down,
+        logic_gate_map.push_back(new AndGate(grid_position_position, temporary_rotation,
                position_in_vector, map_size));
       } else if(currently_selected_object == kEditorObject_Constant_1){
         logic_gate_map.push_back(new Constant_1(grid_position_position, kDirection_Down,
                position_in_vector, map_size));
       } else if(currently_selected_object == kEditorObject_Not){
-        logic_gate_map.push_back(new NotGate(grid_position_position, kDirection_Down,
+        logic_gate_map.push_back(new NotGate(grid_position_position, temporary_rotation,
                position_in_vector, map_size));
       } else if(currently_selected_object == kEditorObject_Separator){
         logic_gate_map.push_back(new Separator(grid_position_position, temporary_rotation,
@@ -459,8 +468,9 @@ GameData::Update() {
   
   for(auto &logic_gate : logic_gate_map){
     if(logic_gate){
-      logic_gate->CheckOutputToWires(energy_map, map_size);
+      
       logic_gate->RunLogic(energy_map);
+      logic_gate->CheckOutputToWires(energy_map, map_size);
     }
   }
 }
