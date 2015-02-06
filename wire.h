@@ -16,6 +16,7 @@ class Energy;
 struct Wire {
   Wire(const Vecf& position, const int position_in_array,
           const eDirection direction);
+  ~Wire();
   void ChangeState (Wire* parent, eLogicalState state, 
                       std::vector<Wire*>& wire_map,
                       const Veci& map_size);

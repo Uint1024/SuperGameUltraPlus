@@ -16,33 +16,28 @@ LogicGate::LogicGate(const Vecf& position,
 body(new StaticBody(position, size, texture_id, direction)),
 position_in_map_grid(position_in_array),
 logical_state(kLogicalState_Empty),
-output_position_in_map_grid {-1,-1},
+output_position_in_map_grid {-1,-1,-1},
 output_direction(direction){
   
 }
 
+LogicGate::~LogicGate(){
+  delete body;
+  body = nullptr;
+}
+
 void 
 LogicGate::CheckOutputToWires(std::vector<std::array<Energy*, 4>>& energy_map, 
+        std::vector<std::array<Energy*, 4>>& temp_energy_map,
         const Veci& map_size) {
-  //std::cout << output_position_in_map_grid[0] << std::endl;
-  //check if there's energy of the same type at the output cell
 
-  if(output_position_in_map_grid[0] != -1) {
-    if(!energy_map[output_position_in_map_grid[0]][(int)output_direction]){
-        
-      if(logical_state != kLogicalState_Empty){
-        energy_map[output_position_in_map_grid[0]][(int)output_direction] = 
+  for(int i = 0 ; i < 3 ; i++){
+    if(output_position_in_map_grid[i] != -1){
+      if(!temp_energy_map[output_position_in_map_grid[i]][(int)output_direction]) {
+        if(logical_state != kLogicalState_Empty){
+          temp_energy_map[output_position_in_map_grid[i]][(int)output_direction] = 
                 new Energy(logical_state);
-        
-      }
-    }
-  }
-  
-  if(output_position_in_map_grid[1] != -1){
-    if(!energy_map[output_position_in_map_grid[1]][(int)output_direction]) {
-      if(logical_state != kLogicalState_Empty){
-        energy_map[output_position_in_map_grid[1]][(int)output_direction] = 
-                new Energy(logical_state);
+       }
       }
     }
   }

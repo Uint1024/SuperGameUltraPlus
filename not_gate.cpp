@@ -66,5 +66,17 @@ NotGate::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
     energy_map[input_position_in_map_grid[0]][i] = nullptr;
   }
   
+  switch(logical_state){
+    case kLogicalState_0:
+      body->sprite.texture_id = kTexture_Not_0;
+      break;
+    case kLogicalState_1:
+      body->sprite.texture_id = kTexture_Not_1;
+      break;
+    default:
+      body->sprite.texture_id = kTexture_Not;
+      break;
+  }
+      
 }
 

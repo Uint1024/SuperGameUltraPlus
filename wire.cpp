@@ -15,6 +15,9 @@ visited(false){
   
 }
 
+Wire::~Wire(){
+  delete body;
+}
 void Wire::Rotate() {
   
 }

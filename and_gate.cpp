@@ -78,6 +78,18 @@ void AndGate::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
   else {
     logical_state == kLogicalState_Error;
   }
+  
+  switch(logical_state){
+    case kLogicalState_0:
+      body->sprite.texture_id = kTexture_And_0;
+      break;
+    case kLogicalState_1:
+      body->sprite.texture_id = kTexture_And_1;
+      break;
+    default:
+      body->sprite.texture_id = kTexture_And;
+      break;
+  }
 
   for(int i = 0 ; i < 4 ; i++) {
     delete energy_map[input_position_in_map_grid[0]][i];

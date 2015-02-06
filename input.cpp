@@ -28,6 +28,8 @@ rotate_key_press_timer(0){
   keymap[SDL_SCANCODE_LSHIFT] = kKey_Select_To_Save;
   keymap[SDL_SCANCODE_KP_MINUS] = kKey_Speed_Down;
   keymap[SDL_SCANCODE_KP_PLUS] = kKey_Speed_Up;
+  keymap[SDL_SCANCODE_RETURN] = kKey_Enter;
+  keymap[SDL_SCANCODE_V] = kKey_Load;
 }
 
 bool Input::PollEvents(GameData& game_data, Engine& engine) {

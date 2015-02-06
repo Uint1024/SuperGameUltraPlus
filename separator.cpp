@@ -16,18 +16,22 @@ void Separator::Rotate(const eDirection direction, const Veci& map_size) {
   if(direction == kDirection_Down) {
     output_position_in_map_grid[0] = position_in_map_grid - 1;
     output_position_in_map_grid[1] = position_in_map_grid + 1;
+    output_position_in_map_grid[2] = position_in_map_grid + map_size.x; 
   }
   if(direction == kDirection_Left) {
     output_position_in_map_grid[0] = position_in_map_grid - map_size.x;
     output_position_in_map_grid[1] = position_in_map_grid + map_size.x;
+    output_position_in_map_grid[2] = position_in_map_grid - 1 ; 
   }
   if(direction == kDirection_Right) {
           output_position_in_map_grid[0] = position_in_map_grid - map_size.x;
     output_position_in_map_grid[1] = position_in_map_grid + map_size.x;
+    output_position_in_map_grid[2] = position_in_map_grid + 1; 
   }
   if(direction == kDirection_Up) {
     output_position_in_map_grid[0] = position_in_map_grid - 1;
     output_position_in_map_grid[1] = position_in_map_grid + 1;
+    output_position_in_map_grid[2] = position_in_map_grid - map_size.x; 
   }
 }
 
@@ -63,6 +67,18 @@ void Separator::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
   }
   else if((low_energy > 0 && high_energy > 0) || error){
     logical_state == kLogicalState_Error;
+  }
+  
+    switch(logical_state){
+    case kLogicalState_0:
+      body->sprite.texture_id = kTexture_Separator_0;
+      break;
+    case kLogicalState_1:
+      body->sprite.texture_id = kTexture_Separator_1;
+      break;
+    default:
+      body->sprite.texture_id = kTexture_Separator;
+      break;
   }
 }
 

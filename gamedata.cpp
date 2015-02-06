@@ -28,6 +28,10 @@ temporary_wire(nullptr)
     wire_map.push_back(nullptr);
   }
   
+  for(int i = 0 ; i < map_size.x * map_size.y ; ++i){
+    logic_gate_map.push_back(nullptr);
+  }
+  
   temporary_wire_map_blueprints.reserve(map_size.x * map_size.y);
   for(int i = 0 ; i < map_size.x * map_size.y ; ++i){
     temporary_wire_map_blueprints.push_back(nullptr);
@@ -155,9 +159,40 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
   }
   
   if(save_gate_window){
+    
     if(keys_down[kKey_Enter]){
       //save
-      
+      temporary_pasted_gates.clear();
+      temporary_pasted_wires.clear();
+      Veci size_selection = {selection_grid_position_end.x - selection_grid_position_begin.x,
+                            selection_grid_position_end.x - selection_grid_position_begin.x};
+      int vector_size = size_selection.x * size_selection.y;
+      for(int i = 0 ; i < vector_size ; ++i){
+        temporary_pasted_gates.push_back(nullptr);
+        temporary_pasted_wires.push_back(nullptr);
+      }
+      int position_in_vector_of_real_map = 0;
+      int position_in_vector_of_temp_map = 0;
+      int x_temp = 0;
+      int y_temp = 0;
+      for(int x = selection_grid_position_begin.x ; 
+              x < selection_grid_position_end.x ; ++x){
+        for(int y = selection_grid_position_begin.y ; 
+                y < selection_grid_position_end.y; ++y){
+          
+          position_in_vector_of_real_map = x + map_size.y * y;
+          position_in_vector_of_temp_map = x_temp * y_temp;
+          //(temporary_pasted_gates[position_in_vector_of_temp_map]) = 
+                  
+                  //*(logic_gate_map[position_in_vector_of_real_map]);
+          /**temporary_pasted_wires[position_in_vector_of_temp_map] = 
+                  *wire_map[position_in_vector_of_real_map];*/
+          ++y_temp;
+        }
+        ++x_temp;
+      }
+      delete save_gate_window;
+      save_gate_window = nullptr;
     }
   }
   
@@ -304,14 +339,6 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
 
     }
 
-    /*if(!making_line_of_wires && currently_selected_object == kEditorObject_Wire 
-            && !temporary_wire){
-        Clean();
-       temporary_wire = new Wire(grid_position_position, 0, temporary_rotation);
-    }*/
-
-
-
     bool pressed_rotate = false;
 
     if(keys_down[kKey_Rotate_Left]){
@@ -354,8 +381,6 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
       Clean();
     }
     bool temp_collision = false;
-
-    //if(!selecting_area && mouse_buttons_down[SDL_BUTTON_LEFT]){
 
 
     for(auto &gate : logic_gate_map) {
@@ -409,17 +434,17 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
 
     if(!temp_collision && !making_line_of_wires && mouse_buttons_down[SDL_BUTTON_LEFT]){
       if(currently_selected_object == kEditorObject_And) {      
-        logic_gate_map.push_back(new AndGate(grid_position_position, temporary_rotation,
-               position_in_vector, map_size));
+        logic_gate_map[position_in_vector]= new AndGate(grid_position_position, temporary_rotation,
+               position_in_vector, map_size);
       } else if(currently_selected_object == kEditorObject_Constant_1){
-        logic_gate_map.push_back(new Constant_1(grid_position_position, kDirection_Down,
-               position_in_vector, map_size));
+        logic_gate_map[position_in_vector]= new Constant_1(grid_position_position, kDirection_Down,
+               position_in_vector, map_size);
       } else if(currently_selected_object == kEditorObject_Not){
-        logic_gate_map.push_back(new NotGate(grid_position_position, temporary_rotation,
-               position_in_vector, map_size));
+        logic_gate_map[position_in_vector]= new NotGate(grid_position_position, temporary_rotation,
+               position_in_vector, map_size);
       } else if(currently_selected_object == kEditorObject_Separator){
-        logic_gate_map.push_back(new Separator(grid_position_position, temporary_rotation,
-               position_in_vector, map_size));
+        logic_gate_map[position_in_vector]= new Separator(grid_position_position, temporary_rotation,
+               position_in_vector, map_size);
       }else if(currently_selected_object == kEditorObject_Wire) {
         delete wire_map[position_in_vector];
         wire_map[position_in_vector] = nullptr;
@@ -474,63 +499,84 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
 
 void 
 GameData::Update() {
+  
   update_timer += g_delta_t;
   if(update_timer > update_delay){
     update_timer = 0;
     
-    for(auto &wire : wire_map){
-      if(wire){
-        wire->CheckIfHasEnergy(energy_map);
-      }
-    }
+    
 
     std::vector<std::array<Energy*, 4>> temporary_energy_map;
     for(int i = 0 ; i < map_size.x * map_size.y ; ++i){
       temporary_energy_map.push_back(std::array<Energy*, 4>{nullptr});
     }
-    for(auto &logic_gate : logic_gate_map){
-      if(logic_gate){
-        logic_gate->CheckOutputToWires(temporary_energy_map, map_size);
-      }
-    }
+    
+    
+
+    
     //todo: fix memory leak!
     for(int i = 0 ; i < energy_map.size() ; i++){
         if(wire_map[i]){
           Wire* wire = wire_map[i];
-
+          bool moved_energy = false;
+          
           switch(wire->body->direction){
             case kDirection_Down:
-              temporary_energy_map[i + map_size.x][kDirection_Down] = new Energy(wire->logical_state);
+              if(wire_map[i + map_size.x] || logic_gate_map[i + map_size.x]){
+                temporary_energy_map[i + map_size.x][kDirection_Down] = new Energy(wire->logical_state);
+                //moved_energy = true;
+              }
               break;
             case kDirection_Right:
-              temporary_energy_map[i+1][kDirection_Right] = new Energy(wire->logical_state);
+              if(wire_map[i + 1] || logic_gate_map[i + 1]){
+                temporary_energy_map[i+1][kDirection_Right] = new Energy(wire->logical_state);
+                moved_energy = true;
+              }
               break;
             case kDirection_Left:
-
-              temporary_energy_map[i-1][kDirection_Left] = new Energy(wire->logical_state);
+              if(wire_map[i - 1] || logic_gate_map[i- 1]){
+                temporary_energy_map[i-1][kDirection_Left] = new Energy(wire->logical_state);
+                moved_energy = true;
+              }
               break;
             case kDirection_Up:
-              temporary_energy_map[i - map_size.y][kDirection_Up] = new Energy(wire->logical_state);
+              if(wire_map[i - map_size.x] || logic_gate_map[i - map_size.x]){
+                temporary_energy_map[i - map_size.y][kDirection_Up] = new Energy(wire->logical_state);
+                moved_energy = true;
+              }
               break;
           }
-          delete energy_map[i][0];
-          delete energy_map[i][1];
-          delete energy_map[i][2];
-          delete energy_map[i][3];
-          energy_map[i][0] = nullptr;
-          energy_map[i][1] = nullptr;
-          energy_map[i][2] = nullptr;
-          energy_map[i][3] = nullptr;
+
         }
         else {
-          //if(!logic_gate_map[i]){
+          if(logic_gate_map[i]){
             //temporary_energy_map[i] = energy_map[i];
-          //}
+          }
         }
     }
+    
+    for(auto &logic_gate : logic_gate_map){
+      if(logic_gate){
+        logic_gate->CheckOutputToWires(energy_map, temporary_energy_map, map_size);
+      }
+    }
 
+    
+    for(auto &energy : energy_map){
+      for(int i = 0 ; i < 4 ; i++){
+        delete energy[i];
+        energy[i] = nullptr;
+      }
+    }
     energy_map = temporary_energy_map;
 
+        
+    for(auto &wire : wire_map){
+      if(wire){
+        wire->CheckIfHasEnergy(energy_map);
+      }
+    }
+    
     for(auto &logic_gate : logic_gate_map){
       if(logic_gate){
 

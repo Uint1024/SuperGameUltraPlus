@@ -78,18 +78,6 @@ Engine::Initialize(std::string window_name, const Veci window_size) {
   sprites_data[kTexture_Wire_Error] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
   
-  /*src_rect = {{96,0,16,16}};
-  sprites_data[kTexture_And] = 
-          SpriteData(logic_sprite_sheet, 0, src_rect, 0);  
-  
-  src_rect = {{96,16,16,16}};
-  sprites_data[kTexture_Not] = 
-          SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
-   *   src_rect = {{96, 32, 16, 16}};
-  sprites_data[kTexture_Separator] = 
-          SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
-*/
-  
   src_rect = {{128,0,32,32}};
   sprites_data[kTexture_And] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0);  
@@ -100,6 +88,30 @@ Engine::Initialize(std::string window_name, const Veci window_size) {
   
   src_rect = {{128,64,32,32}};
   sprites_data[kTexture_Separator] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
+    
+  src_rect = {{128,96,32,32}};
+  sprites_data[kTexture_And_1] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0);  
+  
+  src_rect = {{128,128,32,32}};
+  sprites_data[kTexture_Not_1] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
+  
+  src_rect = {{128,160,32,32}};
+  sprites_data[kTexture_Separator_1] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
+    
+  src_rect = {{128,192,32,32}};
+  sprites_data[kTexture_And_0] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0);  
+  
+  src_rect = {{128,224,32,32}};
+  sprites_data[kTexture_Not_0] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
+  
+  src_rect = {{128,256,32,32}};
+  sprites_data[kTexture_Separator_0] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
   
   src_rect = {{112,0,16,16}};

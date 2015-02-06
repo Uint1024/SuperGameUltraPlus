@@ -40,6 +40,10 @@ struct GameData{
   std::vector<LogicGate*> logic_gate_map;
   std::vector<Wire*> wire_map;
   std::vector<Wire*> temporary_wire_map_blueprints;
+  
+  std::vector<LogicGate*> temporary_pasted_gates;
+  std::vector<Wire*> temporary_pasted_wires;
+  
   eEditorObject currently_selected_object;
   Veci mouse_grid_position;
   Vecf grid_position_position;
