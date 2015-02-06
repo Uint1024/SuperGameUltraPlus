@@ -33,7 +33,7 @@ void
 NotGate::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
   bool has_high_energy = false;
   bool has_low_energy = false;
-  
+  bool error = false;
   for(int i = 0 ; i < 4 ; i++) {
     if(energy_map[input_position_in_map_grid[0]][i]) {
 
@@ -43,6 +43,10 @@ NotGate::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
       if(energy_map[input_position_in_map_grid[0]][i]->state == kLogicalState_1) {
         
         has_high_energy = true;
+      }
+      if(energy_map[input_position_in_map_grid[0]][i]->state == kLogicalState_Error) {
+        
+        error = true;
       }
     }
   }
@@ -60,6 +64,9 @@ NotGate::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
   else if(!has_high_energy && !has_low_energy) {
     logical_state = kLogicalState_Empty;
   } 
+  else if(error){
+    logical_state = kLogicalState_Error;
+  }
 
   for(int i = 0 ; i < 4 ; i++) {
     delete energy_map[input_position_in_map_grid[0]][i];

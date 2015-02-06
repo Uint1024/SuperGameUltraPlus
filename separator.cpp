@@ -11,24 +11,37 @@ LogicGate(position, direction, position_in_array, map_size, kTexture_Separator,
           Rotate(direction, map_size);
 }
 void Separator::Rotate(const eDirection direction, const Veci& map_size) {
+  
   body->direction = direction;
   input_position_in_map_grid[0] = position_in_map_grid;
   if(direction == kDirection_Down) {
+    output_direction[2] = kDirection_Down;
+    output_direction[0] = kDirection_Left;
+    output_direction[1] = kDirection_Right;
     output_position_in_map_grid[0] = position_in_map_grid - 1;
     output_position_in_map_grid[1] = position_in_map_grid + 1;
     output_position_in_map_grid[2] = position_in_map_grid + map_size.x; 
   }
   if(direction == kDirection_Left) {
+    output_direction[1] = kDirection_Down;
+    output_direction[0] = kDirection_Left;
+    output_direction[2] = kDirection_Up;
     output_position_in_map_grid[0] = position_in_map_grid - map_size.x;
     output_position_in_map_grid[1] = position_in_map_grid + map_size.x;
     output_position_in_map_grid[2] = position_in_map_grid - 1 ; 
   }
   if(direction == kDirection_Right) {
+    output_direction[1] = kDirection_Down;
+    output_direction[0] = kDirection_Up;
+    output_direction[2] = kDirection_Right;
           output_position_in_map_grid[0] = position_in_map_grid - map_size.x;
     output_position_in_map_grid[1] = position_in_map_grid + map_size.x;
     output_position_in_map_grid[2] = position_in_map_grid + 1; 
   }
   if(direction == kDirection_Up) {
+    output_direction[2] = kDirection_Up;
+    output_direction[0] = kDirection_Left;
+    output_direction[1] = kDirection_Right;
     output_position_in_map_grid[0] = position_in_map_grid - 1;
     output_position_in_map_grid[1] = position_in_map_grid + 1;
     output_position_in_map_grid[2] = position_in_map_grid - map_size.x; 

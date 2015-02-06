@@ -19,7 +19,7 @@ temporary_gate(nullptr),
 temporary_wire(nullptr)
 //,selecting_area(false)
 ,temporary_rotation(kDirection_Down)
-,update_delay(0)
+,update_delay(100)
 ,update_timer(0)
 ,save_gate_window(nullptr)
 ,selecting_area(false){

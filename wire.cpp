@@ -48,6 +48,7 @@ Wire::CheckIfHasEnergy(std::vector<std::array<Energy*, 4>>& energy_map) {
     }
   }
   
+  std::cout << has_high_energy << " " << has_low_energy << std::endl;
   if(has_high_energy && !has_low_energy) {
     logical_state = kLogicalState_1;
   }

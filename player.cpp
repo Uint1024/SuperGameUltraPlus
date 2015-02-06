@@ -17,11 +17,17 @@ Vecf Player::ReceiveInput(std::array<bool, kKey_Count> keys_down,
   if(keys_down[kKey_Left]){
     movement.x -= 0.5 * g_delta_t;
   }
+  if(keys_down[kKey_Up]){
+    movement.y -= 0.5 * g_delta_t;
+  }
+  if(keys_down[kKey_Down]){
+    movement.y += 0.5 * g_delta_t;
+  }
   
   if(movement.x != 0.0f || movement.y != 0.0f){
     body->sprite.moving = true;
     body->sprite.animation_timer += g_delta_t;
-    if(body->sprite.animation_timer > 200){
+    if(body->sprite.animation_timer > 150){
       ++body->sprite.current_frame;
       if(body->sprite.current_frame == 3){
         body->sprite.current_frame = 0;

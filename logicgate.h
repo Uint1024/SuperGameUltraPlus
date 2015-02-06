@@ -42,7 +42,7 @@ struct LogicGate {
   //position of the wire it will output to
   int output_position_in_map_grid[3];
   int input_position_in_map_grid[2];
-  eDirection output_direction;
+  eDirection output_direction[3];
 };
 
 #endif	/* LOGICGATE_H */

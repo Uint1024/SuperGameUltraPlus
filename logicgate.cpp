@@ -17,7 +17,7 @@ body(new StaticBody(position, size, texture_id, direction)),
 position_in_map_grid(position_in_array),
 logical_state(kLogicalState_Empty),
 output_position_in_map_grid {-1,-1,-1},
-output_direction(direction){
+output_direction{direction, direction, direction}{
   
 }
 
@@ -33,9 +33,9 @@ LogicGate::CheckOutputToWires(std::vector<std::array<Energy*, 4>>& energy_map,
 
   for(int i = 0 ; i < 3 ; i++){
     if(output_position_in_map_grid[i] != -1){
-      if(!temp_energy_map[output_position_in_map_grid[i]][(int)output_direction]) {
+      if(!temp_energy_map[output_position_in_map_grid[i]][(int)output_direction[i]]) {
         if(logical_state != kLogicalState_Empty){
-          temp_energy_map[output_position_in_map_grid[i]][(int)output_direction] = 
+          temp_energy_map[output_position_in_map_grid[i]][(int)output_direction[i]] = 
                 new Energy(logical_state);
        }
       }
