@@ -55,6 +55,15 @@ enum eKey {
   kKey_Separator,
   kKey_Inventory,
   kKey_Workshop,
+  kKey_Gate_1,
+  kKey_Gate_2,
+  kKey_Gate_3,
+  kKey_Gate_4,
+  kKey_Gate_5,
+  kKey_Gate_6,
+  kKey_Gate_7,
+  kKey_Gate_8,
+  kKey_Gate_9,
   kKey_Copy,
   kKey_Paste,
   kKey_Select,
@@ -62,9 +71,13 @@ enum eKey {
   kKey_Raise,
   kKey_Lower,
   kKey_ToggleHeight,
+  kKey_Select_To_Save,
+  kKey_Enter,
   kKey_None,
   kKey_Rotate_Left,
   kKey_Rotate_Right,
+  kKey_Speed_Down,
+  kKey_Speed_Up,
   kKey_Count
 };
 
@@ -111,6 +124,7 @@ using high_resolution_clock_time_point =
 
 extern high_resolution_clock_time_point (*TimeNow)();
 
+extern const int CELLS_SIZE;
 using milliseconds = std::chrono::milliseconds;
 
 extern int g_delta_t;

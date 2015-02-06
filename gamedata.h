@@ -13,6 +13,7 @@
 #include <list>
 #include "logicgate.h"
 #include "energy.h"
+#include "save_gate_window.h"
 
 #include "player.h"
 class Wire;
@@ -25,7 +26,8 @@ struct GameData{
   Vecf ReceiveInput(const std::array<bool, kKey_Count>& keys_down, 
           const std::array<bool, 255>& mouse_buttons_down,
           const Veci& mouse_position_in_window,
-          const Vecf& mouse_position_in_world);
+          const Vecf& mouse_position_in_world,
+          const std::array<bool, kKey_Count>& last_keys_down);
   void Update();
   void Clean();
   void ResetWiresVisitedState();
@@ -47,9 +49,16 @@ struct GameData{
   eDirection temporary_rotation;
   bool mouse_button_pressed_last_frame;
   bool keeping_mouse_pressed;
-  Veci mouse_selection_grid_position_begin;
-  Veci mouse_selection_grid_position_end;
+  
+  SaveGateWindow* save_gate_window;
+  Veci selection_grid_position_begin;
+  Veci selection_grid_position_end;
   bool selecting_area;
+  
+  bool making_line_of_wires;
+  Veci making_line_of_wires_begin;
+  int update_delay;
+  int update_timer;
 };
 
 #endif	/* GAMEDATA_H */

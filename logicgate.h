@@ -23,6 +23,7 @@ struct LogicGate {
             const Veci& map_size, const eTexture texture_id,
             const Veci& size);
   void CheckOutputToWires(std::vector<std::array<Energy*, 4>>& energy_map, const Veci& map_size);
+  virtual void Rotate(const eDirection direction, const Veci& map_size) = 0;
   SolidBody* body;
   eGateType type;
   eLogicalState logical_state;

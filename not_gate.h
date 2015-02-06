@@ -18,6 +18,9 @@ struct NotGate : LogicGate {
 
   virtual void RunLogic(std::vector<std::array<Energy*, 4>>& energy_map);
 
+  virtual void Rotate(const eDirection direction, const Veci& map_size);
+
+
 };
 
 #endif	/* OR_GATE_H */

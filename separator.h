@@ -18,6 +18,9 @@ struct Separator : public LogicGate {
             const Veci& map_size);
 
   virtual void RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) override;
+
+  virtual void Rotate(const eDirection direction, const Veci& map_size);
+
 };
 
 #endif	/* SEPARATOR_H */

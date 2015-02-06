@@ -26,12 +26,8 @@ LogicGate::CheckOutputToWires(std::vector<std::array<Energy*, 4>>& energy_map,
         const Veci& map_size) {
   //std::cout << output_position_in_map_grid[0] << std::endl;
   //check if there's energy of the same type at the output cell
-  bool there_is_energy_at_output_already = false;
-  
+
   if(output_position_in_map_grid[0] != -1) {
-    Energy* energy_at_first_output = 
-            energy_map[output_position_in_map_grid[0]][(int)output_direction];
-    
     if(!energy_map[output_position_in_map_grid[0]][(int)output_direction]){
         
       if(logical_state != kLogicalState_Empty){
@@ -43,9 +39,6 @@ LogicGate::CheckOutputToWires(std::vector<std::array<Energy*, 4>>& energy_map,
   }
   
   if(output_position_in_map_grid[1] != -1){
-    Energy* energy_at_second_output = 
-          energy_map[output_position_in_map_grid[1]][(int)output_direction];
- 
     if(!energy_map[output_position_in_map_grid[1]][(int)output_direction]) {
       if(logical_state != kLogicalState_Empty){
         energy_map[output_position_in_map_grid[1]][(int)output_direction] = 
@@ -54,6 +47,6 @@ LogicGate::CheckOutputToWires(std::vector<std::array<Energy*, 4>>& energy_map,
     }
   }
   
-  
+
 }
 

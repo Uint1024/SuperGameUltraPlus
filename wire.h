@@ -22,6 +22,7 @@ struct Wire {
   void CheckOutputToWire(std::vector<Wire*>& wire_map);
   void MoveElectrons(std::vector<Wire*>& wire_map, const Veci& map_size);
   void CheckIfHasEnergy(std::vector<std::array<Energy*, 4>>& energy_map);
+  void Rotate();
   void ResetState();
   int position_in_array;
   SolidBody* body;

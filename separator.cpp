@@ -7,24 +7,28 @@ Separator::Separator(const Vecf& position,
         const eDirection direction, const int position_in_array, 
         const Veci& map_size) :
 LogicGate(position, direction, position_in_array, map_size, kTexture_Separator,
-        Veci{16,16}){
-    input_position_in_map_grid[0] = position_in_array;
-    if(direction == kDirection_Down) {
-      output_position_in_map_grid[0] = position_in_array - 1;
-      output_position_in_map_grid[1] = position_in_array + 1;
-    }
-    if(direction == kDirection_Left) {
-      output_position_in_map_grid[0] = position_in_array - map_size.x;
-      output_position_in_map_grid[1] = position_in_array + map_size.x;
-    }
-    if(direction == kDirection_Right) {
-            output_position_in_map_grid[0] = position_in_array - map_size.x;
-      output_position_in_map_grid[1] = position_in_array + map_size.x;
-    }
-    if(direction == kDirection_Up) {
-      output_position_in_map_grid[0] = position_in_array - 1;
-      output_position_in_map_grid[1] = position_in_array + 1;
-    }
+        Veci{CELLS_SIZE,CELLS_SIZE}){
+          Rotate(direction, map_size);
+}
+void Separator::Rotate(const eDirection direction, const Veci& map_size) {
+  body->direction = direction;
+  input_position_in_map_grid[0] = position_in_map_grid;
+  if(direction == kDirection_Down) {
+    output_position_in_map_grid[0] = position_in_map_grid - 1;
+    output_position_in_map_grid[1] = position_in_map_grid + 1;
+  }
+  if(direction == kDirection_Left) {
+    output_position_in_map_grid[0] = position_in_map_grid - map_size.x;
+    output_position_in_map_grid[1] = position_in_map_grid + map_size.x;
+  }
+  if(direction == kDirection_Right) {
+          output_position_in_map_grid[0] = position_in_map_grid - map_size.x;
+    output_position_in_map_grid[1] = position_in_map_grid + map_size.x;
+  }
+  if(direction == kDirection_Up) {
+    output_position_in_map_grid[0] = position_in_map_grid - 1;
+    output_position_in_map_grid[1] = position_in_map_grid + 1;
+  }
 }
 
 void Separator::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
@@ -47,10 +51,14 @@ void Separator::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
     }
   }
   
-  if(low_energy > 0 && high_energy == 0){
+    
+  if(low_energy == 0 && high_energy == 0){
+    logical_state = kLogicalState_Empty;
+  }
+  else if(low_energy > 0 && high_energy == 0){
     logical_state = kLogicalState_0;
   }
-  else if(low_energy == 0 && high_energy == 0){
+  else if(low_energy == 0 && high_energy > 0){
     logical_state = kLogicalState_1;
   }
   else if((low_energy > 0 && high_energy > 0) || error){

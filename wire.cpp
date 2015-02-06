@@ -7,11 +7,15 @@
 #include "logicgate.h"
 Wire::Wire(const Vecf& position, const int position_in_array, 
         const eDirection direction) :
-body(new StaticBody(position, Veci{16,16}, kTexture_Wire_Empty, direction)),
+body(new StaticBody(position, Veci{CELLS_SIZE,CELLS_SIZE}, kTexture_Wire_Empty, direction)),
 parent(nullptr),
 logical_state(kLogicalState_Empty),
 position_in_array(position_in_array),
 visited(false){
+  
+}
+
+void Wire::Rotate() {
   
 }
 

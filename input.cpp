@@ -10,6 +10,7 @@ mouse_position_in_world{0.0f,0.0f}
 ,mouse_buttons_down{false}
 ,keys_down{false}
 ,keys_up{false}
+,last_keys_down{false}
 ,keymap{kKey_None},
 delay_between_key_press(100),
 rotate_key_press_timer(0){
@@ -24,6 +25,9 @@ rotate_key_press_timer(0){
   keymap[SDL_SCANCODE_5] = kKey_Constant_1;
   keymap[SDL_SCANCODE_Q] = kKey_Rotate_Left;
   keymap[SDL_SCANCODE_E] = kKey_Rotate_Right;
+  keymap[SDL_SCANCODE_LSHIFT] = kKey_Select_To_Save;
+  keymap[SDL_SCANCODE_KP_MINUS] = kKey_Speed_Down;
+  keymap[SDL_SCANCODE_KP_PLUS] = kKey_Speed_Up;
 }
 
 bool Input::PollEvents(GameData& game_data, Engine& engine) {
@@ -34,10 +38,28 @@ bool Input::PollEvents(GameData& game_data, Engine& engine) {
   if(rotate_key_press_timer < delay_between_key_press) {
     rotate_key_press_timer += g_delta_t;
   }
-    
+  
+  if(game_data.save_gate_window){
+    SDL_StartTextInput();
+  }
+  else{
+    SDL_StopTextInput();
+  }
+  
   while (SDL_PollEvent(&e) != 0) {
     if (e.type == SDL_QUIT){
       return false;
+    }
+    
+    if(game_data.save_gate_window) {
+      if(e.type == SDL_TEXTINPUT){
+        strcat(game_data.save_gate_window->gate_name, e.text.text);
+      }
+      
+      /*if(e.type == ){
+        std::cout << "huh" << std::endl;
+        strcat(game_data.save_gate_window->gate_name, e.text.text);
+      }*/
     }
     
     if (e.type == SDL_KEYDOWN) {
@@ -76,10 +98,11 @@ bool Input::PollEvents(GameData& game_data, Engine& engine) {
   Vecf movement = game_data.ReceiveInput(keys_down, 
           mouse_buttons_down,
           mouse_position_in_window,
-          mouse_position_in_world);
+          mouse_position_in_world,
+          last_keys_down );
   engine.MoveCamera(movement);
   
-  
+  last_keys_down = keys_down;
   
   return true;
 }

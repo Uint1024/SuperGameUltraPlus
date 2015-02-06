@@ -23,6 +23,7 @@ struct Input {
   
   std::array<bool, 255> mouse_buttons_down;
   std::array<bool, kKey_Count> keys_down;
+  std::array<bool, kKey_Count> last_keys_down;
   std::array<bool, kKey_Count> keys_up;
   Veci mouse_position_in_window;
   Vecf mouse_position_in_world;
