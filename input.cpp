@@ -29,7 +29,9 @@ rotate_key_press_timer(0){
   keymap[SDL_SCANCODE_KP_MINUS] = kKey_Speed_Down;
   keymap[SDL_SCANCODE_KP_PLUS] = kKey_Speed_Up;
   keymap[SDL_SCANCODE_RETURN] = kKey_Enter;
-  keymap[SDL_SCANCODE_V] = kKey_Load;
+  //keymap[SDL_SCANCODE_TAB] = kKey_Load;
+  keymap[SDL_SCANCODE_C] = kKey_Copy;
+  keymap[SDL_SCANCODE_V] = kKey_Paste;
 }
 
 bool Input::PollEvents(GameData& game_data, Engine& engine) {

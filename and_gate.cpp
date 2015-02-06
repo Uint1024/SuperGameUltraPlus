@@ -5,7 +5,8 @@
 AndGate::AndGate(const Vecf& position,
         const eDirection direction, const int position_in_array, 
         const Veci& map_size) :
-LogicGate(position, direction, position_in_array, map_size, kTexture_And, Veci{CELLS_SIZE,CELLS_SIZE}){
+LogicGate(position, direction, position_in_array, map_size, kTexture_And, 
+        Veci{CELLS_SIZE,CELLS_SIZE}, kEditorObject_And){
   Rotate(direction, map_size);
 }
 

@@ -41,8 +41,9 @@ struct GameData{
   std::vector<Wire*> wire_map;
   std::vector<Wire*> temporary_wire_map_blueprints;
   
-  std::vector<LogicGate*> temporary_pasted_gates;
-  std::vector<Wire*> temporary_pasted_wires;
+  std::vector<LogicGate*> clipboard_gates;
+  std::vector<Wire*> clipboard_wires;
+  Veci clipboard_size;
   
   eEditorObject currently_selected_object;
   Veci mouse_grid_position;
@@ -63,6 +64,8 @@ struct GameData{
   Veci making_line_of_wires_begin;
   int update_delay;
   int update_timer;
+  bool selected_area;
+  bool wanting_to_paste;
 };
 
 #endif	/* GAMEDATA_H */

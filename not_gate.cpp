@@ -4,7 +4,7 @@
 NotGate::NotGate(const Vecf& position, const eDirection direction, 
         const int position_in_array, const Veci& map_size):
 LogicGate(position, direction, position_in_array, map_size, kTexture_Not, 
-        Veci{CELLS_SIZE,CELLS_SIZE}) {
+        Veci{CELLS_SIZE,CELLS_SIZE}, kEditorObject_Not) {
   Rotate(direction, map_size);
 }
 

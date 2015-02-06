@@ -1,4 +1,5 @@
-
+#include <cstring>
+#include <stdio.h>
 #include <iostream>
 #include "logicgate.h"
 #include "bbox.h"
@@ -12,19 +13,56 @@
 LogicGate::LogicGate(const Vecf& position,
         const eDirection direction, const int position_in_array,
         const Veci& map_size, const eTexture texture_id,
-        const Veci& size) :
+        const Veci& size, const eEditorObject object_type) :
 body(new StaticBody(position, size, texture_id, direction)),
 position_in_map_grid(position_in_array),
 logical_state(kLogicalState_Empty),
 output_position_in_map_grid {-1,-1,-1},
-output_direction{direction, direction, direction}{
+output_direction{direction, direction, direction},
+object_type(object_type){
   
 }
 
-LogicGate::~LogicGate(){
+LogicGate::~LogicGate() 
+{
   delete body;
   body = nullptr;
 }
+
+LogicGate::LogicGate(const LogicGate& rhs) :
+body(new StaticBody(Vecf{rhs.body->bbox.top, rhs.body->bbox.left}, 
+        rhs.body->bbox.size, 
+        rhs.body->sprite.texture_id, rhs.body->direction))
+        ,position_in_map_grid(rhs.position_in_map_grid),
+logical_state(kLogicalState_Empty),
+object_type(rhs.object_type)
+{
+  std::memcpy(input_position_in_map_grid, rhs.input_position_in_map_grid, 2);
+  std::memcpy(output_position_in_map_grid, rhs.output_position_in_map_grid, 3);
+  std::memcpy(output_direction, rhs.output_direction, 3);
+}
+
+LogicGate& LogicGate::operator=(const LogicGate& rhs){
+  //delete body;
+  
+  body = new StaticBody(Vecf{rhs.body->bbox.top, rhs.body->bbox.left}, 
+        rhs.body->bbox.size,
+          
+        rhs.body->sprite.texture_id,
+          
+        rhs.body->direction);
+  
+  
+  position_in_map_grid = rhs.position_in_map_grid;
+  logical_state = rhs.logical_state;
+  object_type = rhs.object_type;
+  std::memcpy(input_position_in_map_grid, rhs.input_position_in_map_grid, 2);
+  std::memcpy(output_position_in_map_grid, rhs.output_position_in_map_grid, 3);
+  std::memcpy(output_direction, rhs.output_direction, 3);
+  
+  return *this;
+}
+
 
 void 
 LogicGate::CheckOutputToWires(std::vector<std::array<Energy*, 4>>& energy_map, 
