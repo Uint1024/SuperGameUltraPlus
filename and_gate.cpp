@@ -57,7 +57,7 @@ void AndGate::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
  
   
   if(!error){
-    if(low_energy >= 2 && high_energy == 0) {
+    if(low_energy >= 1 && high_energy == 0) {
       logical_state = kLogicalState_0;
     }
     else if(high_energy >= 2 && low_energy == 0) {
@@ -70,10 +70,10 @@ void AndGate::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
       logical_state = kLogicalState_Empty;
     } 
     else if(high_energy == 1 && low_energy == 0) {
-      logical_state = kLogicalState_Empty;
+      logical_state = kLogicalState_0;
     } 
     else if(high_energy == 0 && low_energy == 1) {
-      logical_state = kLogicalState_Empty;
+      logical_state = kLogicalState_0;
     } 
   }
   else {

@@ -10,7 +10,17 @@ LogicGate(position, direction, position_in_array, map_size, kTexture_Constant_1,
 
 void 
 Constant_1::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
-  //do nothing
+   switch(logical_state){
+    case kLogicalState_0:
+      body->sprite.texture_id = kTexture_Constant_0;
+      break;
+    case kLogicalState_1:
+      body->sprite.texture_id = kTexture_Constant_1;
+      break;
+    default:
+      body->sprite.texture_id = kTexture_Constant_0;
+      break;
+  }
 }
 
 void Constant_1::Rotate(const eDirection direction, const Veci& map_size) {

@@ -6,13 +6,24 @@
 #include "static_body.h"
 #include "logicgate.h"
 Wire::Wire(const Vecf& position, const int position_in_array, 
-        const eDirection direction) :
+        const eDirection direction, const eEditorObject type) :
 body(new StaticBody(position, Veci{CELLS_SIZE,CELLS_SIZE}, kTexture_Wire_Empty, direction)),
 parent(nullptr),
 logical_state(kLogicalState_Empty),
 position_in_array(position_in_array),
-visited(false){
-  
+visited(false),
+type(type){
+  switch(type){
+    case kEditorObject_Wire:
+      body->sprite.texture_id = kTexture_Wire_Empty;
+      break;
+    case kEditorObject_Wire_Underground:
+      body->sprite.texture_id = kTexture_Wire_Underground;
+      break;
+    case kEditorObject_Wire_Underground_Exit:
+      body->sprite.texture_id = kTexture_Wire_Underground_Exit;
+      break;
+  }
 }
 
 Wire::~Wire(){
@@ -48,7 +59,6 @@ Wire::CheckIfHasEnergy(std::vector<std::array<Energy*, 4>>& energy_map) {
     }
   }
   
-  std::cout << has_high_energy << " " << has_low_energy << std::endl;
   if(has_high_energy && !has_low_energy) {
     logical_state = kLogicalState_1;
   }
@@ -62,22 +72,44 @@ Wire::CheckIfHasEnergy(std::vector<std::array<Energy*, 4>>& energy_map) {
     logical_state = kLogicalState_Empty;
   }
   
-  switch(logical_state){
-    case kLogicalState_0:
-      body->sprite.texture_id = kTexture_Wire_0;
-      break;
-    case kLogicalState_1:
-      body->sprite.texture_id = kTexture_Wire_1;
-      break;
-    case kLogicalState_Empty:
-      body->sprite.texture_id = kTexture_Wire_Empty;
-      break;
-    case kLogicalState_Error:
-      body->sprite.texture_id = kTexture_Wire_Error;
-      break;
-    default:
-      std::cout << "Error, unknown state." << std::endl;
-      break;
+  if(type == kEditorObject_Wire){
+    switch(logical_state){
+      case kLogicalState_0:
+        body->sprite.texture_id = kTexture_Wire_0;
+        break;
+      case kLogicalState_1:
+        body->sprite.texture_id = kTexture_Wire_1;
+        break;
+      case kLogicalState_Empty:
+        body->sprite.texture_id = kTexture_Wire_Empty;
+        break;
+      case kLogicalState_Error:
+        body->sprite.texture_id = kTexture_Wire_Error;
+        break;
+      default:
+        std::cout << "Error, unknown state." << std::endl;
+        break;
+    }
+  }
+    
+  if(type == kEditorObject_Wire_Underground){
+    switch(logical_state){
+      case kLogicalState_0:
+        body->sprite.texture_id = kTexture_Wire_Underground_0;
+        break;
+      case kLogicalState_1:
+        body->sprite.texture_id = kTexture_Wire_Underground_1;
+        break;
+      case kLogicalState_Empty:
+        body->sprite.texture_id = kTexture_Wire_Underground;
+        break;
+      case kLogicalState_Error:
+        body->sprite.texture_id = kTexture_Wire_Underground;
+        break;
+      default:
+        std::cout << "Error, unknown state." << std::endl;
+        break;
+    }
   }
 }
 

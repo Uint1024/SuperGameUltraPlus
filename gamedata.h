@@ -27,7 +27,8 @@ struct GameData{
           const std::array<bool, 255>& mouse_buttons_down,
           const Veci& mouse_position_in_window,
           const Vecf& mouse_position_in_world,
-          const std::array<bool, kKey_Count>& last_keys_down);
+          const std::array<bool, kKey_Count>& last_keys_down,
+          const std::array<bool, 255>& last_mouse_buttons_down);
   void Update();
   void Clean();
   void ResetWiresVisitedState();
@@ -36,9 +37,11 @@ struct GameData{
   Veci map_size;
   //grid of energy, each cell can have 4 "energy" objects, 1 from each direction
   std::vector<std::array<Energy*, 4>> energy_map;
+  std::vector<std::array<Energy*, 4>> energy_map_underground;
   std::vector<LogicGate*> battery_map;
   std::vector<LogicGate*> logic_gate_map;
   std::vector<Wire*> wire_map;
+  std::vector<Wire*> wire_map_underground;
   std::vector<Wire*> temporary_wire_map_blueprints;
   
   std::vector<LogicGate*> clipboard_gates;

@@ -15,7 +15,8 @@ class Engine;
 class Energy;
 struct Wire {
   Wire(const Vecf& position, const int position_in_array,
-          const eDirection direction);
+          const eDirection direction,
+          const eEditorObject type);
   ~Wire();
   void ChangeState (Wire* parent, eLogicalState state, 
                       std::vector<Wire*>& wire_map,
@@ -31,6 +32,7 @@ struct Wire {
   eLogicalState logical_state;
   //wires can only be visited once per frame to prevent infinite loop
   bool visited;
+  eEditorObject type;
 };
 
 #endif	/* WIRE_H */

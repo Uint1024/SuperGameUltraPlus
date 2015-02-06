@@ -27,7 +27,6 @@ Bbox::MoveTo(const Vecf& position) {
 
 bool 
 Bbox::CollisionWithPoint(const Vecf& point) {
-  //std::cout << left << ">" << point.x << " ; " << right << " < " << point.x  << std::endl;
   if(left > point.x || right < point.x || 
      top > point.y || bottom < point.y) {
     return false;

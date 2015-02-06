@@ -11,17 +11,28 @@ body(new DynamicBody(pos, Veci{64, 64}, kTexture_Player, kDirection_Down)){
 Vecf Player::ReceiveInput(std::array<bool, kKey_Count> keys_down,
                     std::array<bool, 255> mouse_buttons_down) {
   Vecf movement = {0.0f,0.0f};
+  float speed = 0.5f;
   if(keys_down[kKey_Right]){
-    movement.x += 0.5 * g_delta_t;
+    if(keys_down[kKey_Up] || keys_down[kKey_Down]){
+      speed = 0.35f;
+    }
   }
   if(keys_down[kKey_Left]){
-    movement.x -= 0.5 * g_delta_t;
+    if(keys_down[kKey_Up] || keys_down[kKey_Down]){
+      speed = 0.35f;
+    }
+  }
+  if(keys_down[kKey_Right]){
+    movement.x += speed * g_delta_t;
+  }
+  if(keys_down[kKey_Left]){
+    movement.x -= speed * g_delta_t;
   }
   if(keys_down[kKey_Up]){
-    movement.y -= 0.5 * g_delta_t;
+    movement.y -= speed * g_delta_t;
   }
   if(keys_down[kKey_Down]){
-    movement.y += 0.5 * g_delta_t;
+    movement.y += speed * g_delta_t;
   }
   
   if(movement.x != 0.0f || movement.y != 0.0f){

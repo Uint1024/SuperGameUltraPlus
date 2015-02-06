@@ -114,11 +114,29 @@ Engine::Initialize(std::string window_name, const Veci window_size) {
   sprites_data[kTexture_Separator_0] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
   
-  src_rect = {{112,0,16,16}};
+  src_rect = {{96,64,32,32}};
   sprites_data[kTexture_Constant_1] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0);
   
-
+  src_rect = {{96,96,32,32}};
+  sprites_data[kTexture_Constant_0] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0);
+  
+  src_rect = {{48,88,22,22}};
+    sprites_data[kTexture_Wire_Underground] = 
+            SpriteData(logic_sprite_sheet, 0, src_rect, 0);
+    
+  src_rect = {{4,88,22,22}};
+    sprites_data[kTexture_Wire_Underground_0] = 
+            SpriteData(logic_sprite_sheet, 0, src_rect, 0);
+    
+    src_rect = {{26,88,22,22}};
+    sprites_data[kTexture_Wire_Underground_1] = 
+            SpriteData(logic_sprite_sheet, 0, src_rect, 0);
+    
+      src_rect = {{48,100,22,22}};
+    sprites_data[kTexture_Wire_Underground_Exit] = 
+            SpriteData(logic_sprite_sheet, 0, src_rect, 0);
   
 }
 
