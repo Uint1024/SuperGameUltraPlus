@@ -55,6 +55,7 @@ void Separator::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
   
   for(int i = 0 ; i < 4 ; i++) {
     if(energy_map[input_position_in_map_grid[0]][i]) {
+            energy_value = energy_map[input_position_in_map_grid[0]][i]->value;
       if(energy_map[input_position_in_map_grid[0]][i]->state == kLogicalState_0) {
         ++low_energy;
       }

@@ -26,6 +26,12 @@ struct LogicGate {
   LogicGate(const LogicGate& rhs);
   void CheckOutputToWires(std::vector<std::array<Energy*, 4>>& energy_map, 
   std::vector<std::array<Energy*, 4>>& temp_energy_map, const Veci& map_size);
+  void CheckOutputToUndergroundWires(
+      std::vector<std::array<Energy*, 4>>& energy_map, 
+      std::vector<std::array<Energy*, 4>>& temp_energy_map, 
+      const Veci& map_size,
+      std::vector<Wire*> wire_map,
+      std::vector<Wire*> wire_map_underground);
   virtual void Rotate(const eDirection direction, const Veci& map_size) = 0;
   LogicGate& operator=(const LogicGate& rhs);
   SolidBody* body;
@@ -40,6 +46,7 @@ struct LogicGate {
   int input_position_in_map_grid[2];
   eDirection output_direction[3];
   eEditorObject object_type;
+  int energy_value;
 };
 
 #endif	/* LOGICGATE_H */

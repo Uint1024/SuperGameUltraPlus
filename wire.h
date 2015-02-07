@@ -34,6 +34,7 @@ struct Wire {
   bool visited;
   eEditorObject type;
   eDirection output_direction;
+  int energy_value;
 };
 
 #endif	/* WIRE_H */

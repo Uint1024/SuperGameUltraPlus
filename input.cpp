@@ -33,6 +33,7 @@ rotate_key_press_timer(0){
   //keymap[SDL_SCANCODE_TAB] = kKey_Load;
   keymap[SDL_SCANCODE_C] = kKey_Copy;
   keymap[SDL_SCANCODE_V] = kKey_Paste;
+  keymap[SDL_SCANCODE_DELETE] = kKey_Delete;
 }
 
 bool Input::PollEvents(GameData& game_data, Engine& engine) {
@@ -40,6 +41,9 @@ bool Input::PollEvents(GameData& game_data, Engine& engine) {
   mouse_position_in_world.x = mouse_position_in_window.x + engine.camera.x;
   mouse_position_in_world.y = mouse_position_in_window.y + engine.camera.y;
   
+  mouse_buttons_down[kKey_Mouse_Rotate_Right] = false;
+  mouse_buttons_down[kKey_Mouse_Rotate_Left] = false;
+          
   if(rotate_key_press_timer < delay_between_key_press) {
     rotate_key_press_timer += g_delta_t;
   }
@@ -52,34 +56,43 @@ bool Input::PollEvents(GameData& game_data, Engine& engine) {
   }
   
   while (SDL_PollEvent(&e) != 0) {
-    if (e.type == SDL_QUIT){
-      return false;
+    eKey key = kKey_None;
+    //key = keymap[e.key.keysym.scancode];
+    switch(e.type){
+      
+      case SDL_QUIT:
+        return false;
+        break;
+      case SDL_KEYDOWN:
+        keys_down[keymap[e.key.keysym.scancode]] = true;
+        break;
+      case SDL_KEYUP:
+        keys_down[keymap[e.key.keysym.scancode]] = false;	
+        break;
+
+      case SDL_MOUSEBUTTONDOWN:
+        mouse_buttons_down[e.button.button] = true;
+        break;
+
+      case SDL_MOUSEBUTTONUP:
+        mouse_buttons_down[e.button.button] = false;
+        break;
+        
+      case SDL_MOUSEWHEEL:
+        if(e.wheel.y > 0){
+          mouse_buttons_down[kKey_Mouse_Rotate_Left] = true;
+        }
+        else if(e.wheel.y < 0){
+          mouse_buttons_down[kKey_Mouse_Rotate_Right] = true;
+        }        
+        break;
     }
     
     if(game_data.save_gate_window) {
       if(e.type == SDL_TEXTINPUT){
         strcat(game_data.save_gate_window->gate_name, e.text.text);
       }
-      
-    }
-    
-    if (e.type == SDL_KEYDOWN) {
-      eKey key = keymap[e.key.keysym.scancode];
-      
-      keys_down[key] = true;
-		}
-      
-    if (e.type == SDL_KEYUP) {
-      keys_down[keymap[e.key.keysym.scancode]] = false;	
-    }
-
-    if (e.type == SDL_MOUSEBUTTONDOWN) {
-      mouse_buttons_down[e.button.button] = true;
-    }
-
-    if (e.type == SDL_MOUSEBUTTONUP) {
-      mouse_buttons_down[e.button.button] = false;
-    }
+    }    
   }
   
   if(keys_down[kKey_Rotate_Left]){

@@ -13,7 +13,8 @@ logical_state(kLogicalState_Empty),
 position_in_array(position_in_array),
 visited(false),
 type(type),
-output_direction(direction){
+output_direction(direction),
+energy_value(100){
   switch(type){
     case kEditorObject_Wire:
       body->sprite.texture_id = kTexture_Wire_Empty;
@@ -42,15 +43,17 @@ Wire::CheckIfHasEnergy(std::vector<std::array<Energy*, 4>>& energy_map) {
   //std::array<Energy*, 4>& energy_array = energy_map[position_in_array];
   bool has_high_energy = false;
   bool has_low_energy = false;
+  int highest_energy = 0;
   
   for(int i = 0 ; i < 4 ; i++) {
     if(energy_map[position_in_array][i]) {
       
+      
+      energy_value = energy_map[position_in_array][i]->value; 
       if(energy_map[position_in_array][i]->state == kLogicalState_0) {
         has_low_energy = true;
       }
       if(energy_map[position_in_array][i]->state == kLogicalState_1) {
-        
         has_high_energy = true;
       }
       if(energy_map[position_in_array][i]->state == kLogicalState_Error) {
@@ -59,6 +62,7 @@ Wire::CheckIfHasEnergy(std::vector<std::array<Energy*, 4>>& energy_map) {
       }
     }
   }
+  
   
   if(has_high_energy && !has_low_energy) {
     logical_state = kLogicalState_1;

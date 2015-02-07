@@ -22,6 +22,7 @@ struct Engine {
   void Render(GameData& game_data);
   
   void MoveCamera(const Vecf& movement);
+  
   SDL_Window* window;
   SDL_Renderer* renderer;
   Uint32 pixel_format; //pixel format of the window, used with SDL_RenderCopy
@@ -31,6 +32,7 @@ struct Engine {
   //access using the eTexture enum
   std::array<SpriteData, kTexture_Count> sprites_data;
    Vecf camera;
+   
 };
 
 #endif	/* ENGINE_H */

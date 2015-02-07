@@ -19,8 +19,9 @@ position_in_map_grid(position_in_array),
 logical_state(kLogicalState_Empty),
 output_position_in_map_grid {-1,-1,-1},
 output_direction{direction, direction, direction},
-object_type(object_type){
-  
+object_type(object_type),
+energy_value(100){
+
 }
 
 LogicGate::~LogicGate() 
@@ -74,12 +75,29 @@ LogicGate::CheckOutputToWires(std::vector<std::array<Energy*, 4>>& energy_map,
       if(!temp_energy_map[output_position_in_map_grid[i]][(int)output_direction[i]]) {
         if(logical_state != kLogicalState_Empty){
           temp_energy_map[output_position_in_map_grid[i]][(int)output_direction[i]] = 
-                new Energy(logical_state);
+                new Energy(logical_state, energy_value);
        }
       }
     }
   }
-  
-
 }
 
+void LogicGate::CheckOutputToUndergroundWires(
+        std::vector<std::array<Energy*, 4> >& energy_map, 
+        std::vector<std::array<Energy*, 4> >& temp_energy_map, 
+        const Veci& map_size, 
+        std::vector<Wire*> wire_map, std::vector<Wire*> wire_map_underground) {
+  for(int i = 0 ; i < 3 ; i++){
+    if(output_position_in_map_grid[i] != -1){
+      if(!temp_energy_map[output_position_in_map_grid[i]][(int)output_direction[i]]) {
+        if(logical_state != kLogicalState_Empty){
+          if(wire_map_underground[output_position_in_map_grid[i]] &&
+                  !wire_map[output_position_in_map_grid[i]]){
+              temp_energy_map[output_position_in_map_grid[i]][(int)output_direction[i]] = 
+                new Energy(logical_state, energy_value);
+          }
+       }
+      }
+    }
+  }
+}

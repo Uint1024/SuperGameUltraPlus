@@ -33,6 +33,7 @@ struct GameData{
   void Clean();
   void ResetWiresVisitedState();
   void CreateTemporaryObject(const eEditorObject object_type, const Vecf& position);
+  void TransmitEnergyValue();
   Player player;
   Veci map_size;
   //grid of energy, each cell can have 4 "energy" objects, 1 from each direction
@@ -46,6 +47,7 @@ struct GameData{
   
   std::vector<LogicGate*> clipboard_gates;
   std::vector<Wire*> clipboard_wires;
+  std::vector<Wire*> clipboard_wires_underground;
   Veci clipboard_size;
   
   eEditorObject currently_selected_object;

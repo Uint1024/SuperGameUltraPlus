@@ -82,6 +82,8 @@ enum eKey {
   kKey_Rotate_Right,
   kKey_Speed_Down,
   kKey_Speed_Up,
+  kKey_Mouse_Rotate_Left,
+  kKey_Mouse_Rotate_Right,
   kKey_Count
 };
 
