@@ -722,8 +722,7 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
     
     for(int i = 0 ; i < temporary_wire_map_blueprints.size() ; i++){
       if(temporary_wire_map_blueprints[i]){
-        if(temporary_wire_map_blueprints[i]->type == kEditorObject_Wire ||
-                temporary_wire_map_blueprints[i]->type == kEditorObject_Wire_Underground_Exit){
+        if(temporary_wire_map_blueprints[i]->type == kEditorObject_Wire){
           wire_map[i] = temporary_wire_map_blueprints[i];
         } else {
           wire_map_underground[i] = temporary_wire_map_blueprints[i];
@@ -761,106 +760,43 @@ GameData::Update() {
           bool moved_energy = false;
           
           if(wire->type == kEditorObject_Wire){
-            switch(wire->body->direction){
-              case kDirection_Down:
-                if(wire_map[i + map_size.x] || logic_gate_map[i + map_size.x]){
-                  temporary_energy_map[i + map_size.x][kDirection_Down] = new Energy(wire->logical_state);
-                  //moved_energy = true;
-                }
-                break;
-              case kDirection_Right:
-                if(wire_map[i + 1] || logic_gate_map[i + 1]){
-                  temporary_energy_map[i+1][kDirection_Right] = new Energy(wire->logical_state);
-                  moved_energy = true;
-                }
-                break;
-              case kDirection_Left:
-                if(wire_map[i - 1] || logic_gate_map[i- 1]){
-                  temporary_energy_map[i-1][kDirection_Left] = new Energy(wire->logical_state);
-                  moved_energy = true;
-                }
-                break;
-              case kDirection_Up:
-                if(wire_map[i - map_size.x] || logic_gate_map[i - map_size.x]){
-                  temporary_energy_map[i - map_size.y][kDirection_Up] = new Energy(wire->logical_state);
-                  moved_energy = true;
-                }
-                break;
+            int direction_grid_position[4] = {
+              i + 1,          //right
+              i + map_size.y, //down
+              i - 1,          //left,
+              i - map_size.y //up
+            };
+            eDirection direction = wire->body->direction;
+            if(wire_map[direction_grid_position[direction]] || logic_gate_map[direction_grid_position[direction]]){
+                temporary_energy_map[direction_grid_position[direction]][direction] = new Energy(wire->logical_state);
+              }
+            if(wire_map_underground[direction_grid_position[direction]] && 
+                    wire_map_underground[direction_grid_position[direction]]->output_direction == direction){
+                temporary_energy_map_underground[direction_grid_position[direction]][direction] = new Energy(wire->logical_state);
             }
-          }
-          else{
-            switch(wire->body->direction){
-              case kDirection_Down:
-                if(wire_map_underground[i + map_size.x]){
-                  temporary_energy_map_underground[i + map_size.x][kDirection_Down] = new Energy(wire->logical_state);
-                  //moved_energy = true;
-                }
-                break;
-              case kDirection_Right:
-                if(wire_map_underground[i + 1]){
-                  temporary_energy_map_underground[i+1][kDirection_Right] = new Energy(wire->logical_state);
-                  moved_energy = true;
-                }
-                break;
-              case kDirection_Left:
-                if(wire_map_underground[i - 1]){
-                  temporary_energy_map_underground[i-1][kDirection_Left] = new Energy(wire->logical_state);
-                  moved_energy = true;
-                }
-                break;
-              case kDirection_Up:
-                if(wire_map_underground[i - map_size.x]){
-                  temporary_energy_map_underground[i - map_size.y][kDirection_Up] = new Energy(wire->logical_state);
-                  moved_energy = true;
-                }
-                break;
-            }
-          }
-
-        }
-        else {
-          if(logic_gate_map[i]){
-            //temporary_energy_map[i] = energy_map[i];
+            
           }
         }
     }
     
     for(int i = 0 ; i < energy_map_underground.size() ; i++){
-        if(wire_map_underground[i]){
-          Wire* wire = wire_map_underground[i];
-          bool moved_energy = false;
-
-            switch(wire->body->direction){
-              case kDirection_Down:
-                if(wire_map_underground[i + map_size.x] || 
-                        (wire_map[i + map_size.x] && wire_map[i + map_size.x]->type == kEditorObject_Wire_Underground_Exit)){
-                  temporary_energy_map_underground[i + map_size.x][kDirection_Down] = new Energy(wire->logical_state);
-                  //moved_energy = true;
-                }
-                break;
-              case kDirection_Right:
-                if(wire_map_underground[i + 1] || 
-                        (wire_map[i + 1] && wire_map[i + 1]->type == kEditorObject_Wire_Underground_Exit)){
-                  temporary_energy_map_underground[i+1][kDirection_Right] = new Energy(wire->logical_state);
-                  moved_energy = true;
-                }
-                break;
-              case kDirection_Left:
-                if(wire_map_underground[i - 1] || 
-                        (wire_map[i - 1] && wire_map[i - 1]->type == kEditorObject_Wire_Underground_Exit)){
-                  temporary_energy_map_underground[i-1][kDirection_Left] = new Energy(wire->logical_state);
-                  moved_energy = true;
-                }
-                break;
-              case kDirection_Up:
-                if(wire_map_underground[i - map_size.x] || 
-                        (wire_map[i - map_size.x] && wire_map[i - map_size.x]->type == kEditorObject_Wire_Underground_Exit)){
-                  temporary_energy_map_underground[i - map_size.y][kDirection_Up] = new Energy(wire->logical_state);
-                  moved_energy = true;
-                }
-                break;
+      if(wire_map_underground[i]){
+        Wire* wire = wire_map_underground[i];
+        int direction_grid_position[4] = {
+            i + 1,          //right
+            i + map_size.y, //down
+            i - 1,          //left,
+            i - map_size.y //up
+          };
+          eDirection direction = wire->body->direction;
+            if(wire_map_underground[direction_grid_position[direction]]){
+                temporary_energy_map_underground[direction_grid_position[direction]][direction] = new Energy(wire->logical_state);
+            } else {
+              if(wire_map[direction_grid_position[direction]]){
+                temporary_energy_map[direction_grid_position[direction]][direction] = new Energy(wire->logical_state);
+              }
             }
-          }
+      }
     }
           
     for(auto &logic_gate : logic_gate_map){

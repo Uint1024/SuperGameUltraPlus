@@ -33,6 +33,7 @@ struct Wire {
   //wires can only be visited once per frame to prevent infinite loop
   bool visited;
   eEditorObject type;
+  eDirection output_direction;
 };
 
 #endif	/* WIRE_H */

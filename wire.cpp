@@ -12,7 +12,8 @@ parent(nullptr),
 logical_state(kLogicalState_Empty),
 position_in_array(position_in_array),
 visited(false),
-type(type){
+type(type),
+output_direction(direction){
   switch(type){
     case kEditorObject_Wire:
       body->sprite.texture_id = kTexture_Wire_Empty;
