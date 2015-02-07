@@ -65,6 +65,7 @@ struct GameData{
   
   bool making_line_of_wires;
   Veci making_line_of_wires_begin;
+  Veci making_line_of_wires_begin_backup;
   int update_delay;
   int update_timer;
   bool selected_area;

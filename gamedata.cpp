@@ -413,6 +413,7 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
             mouse_buttons_down[SDL_BUTTON_LEFT] && 
             mouse_button_pressed_last_frame){
       making_line_of_wires_begin = mouse_grid_position;
+      making_line_of_wires_begin_backup = making_line_of_wires_begin;
       keeping_mouse_pressed = true;
     }
 
@@ -434,145 +435,102 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
 
 
 
-        //calculating distance from origin of selection to know
-        //direction of slide
+        //always begin creation top left corner
+        //so we compare the begin and end and swap values if needed
+        
         int diff_x = mouse_grid_position.x - making_line_of_wires_begin.x;
         int diff_y = mouse_grid_position.y - making_line_of_wires_begin.y;
-        if(diff_x >= 0 && diff_y >= 0){
-          if(diff_x > diff_y){
+        int spawn_begin = 0;
+        int spawn_end = 0;
+        if(abs(diff_x) > abs(diff_y)){
+            
+            
+          if(diff_x >= 0 && diff_y >= 0){
             temporary_rotation = kDirection_Right;
-            for(int i = making_line_of_wires_begin.x ;
-                    i <= mouse_grid_position.x ;
-                    ++i){
-              int position_in_vector = 
-                      i + making_line_of_wires_begin.y * map_size.x;
-              Vecf real_position = { static_cast<float>(i) * CELLS_SIZE,  
-                                 static_cast<float>(making_line_of_wires_begin.y) * CELLS_SIZE };
-              if(temporary_wire->type == kEditorObject_Wire){
-                temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                      position_in_vector, temporary_rotation, temporary_wire->type);
-              } else{
-                if(i == making_line_of_wires_begin.x ||
-                        i == mouse_grid_position.x){
-                  temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                      position_in_vector, temporary_rotation, temporary_wire->type);
-                } else{
-                  temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                      position_in_vector, temporary_rotation, kEditorObject_Wire_Underground);
-                }
-              }
-            }
-          }else{
-            temporary_rotation = kDirection_Down;
-            for(int i = making_line_of_wires_begin.y ;
-                    i <= mouse_grid_position.y ;
-                    ++i){
-              int position_in_vector = 
-                      making_line_of_wires_begin.x + i * map_size.x;
-              Vecf real_position = { static_cast<float>(making_line_of_wires_begin.x) * CELLS_SIZE,  
-                                 static_cast<float>(i) * CELLS_SIZE };
-              if(temporary_wire->type == kEditorObject_Wire){
-                temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                      position_in_vector, temporary_rotation, temporary_wire->type);
-              } else{
-                if(i == making_line_of_wires_begin.y ||
-                        i == mouse_grid_position.y){
-                  temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                      position_in_vector, temporary_rotation, temporary_wire->type);
-                } else{
-                  temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                      position_in_vector, temporary_rotation, kEditorObject_Wire_Underground);
-                }
-              }
-            }
+            spawn_begin = making_line_of_wires_begin.x;
+            spawn_end = mouse_grid_position.x;
           }
-        }
-        /*if(diff_x <= 0 && diff_y >= 0){
-          if(abs(diff_x) > diff_y){
+          
+          if(diff_x <= 0 && diff_y >= 0){
             temporary_rotation = kDirection_Left;
-            for(int i = making_line_of_wires_begin.x ;
-                    i >= mouse_grid_position.x ;
-                    --i){
-              int position_in_vector = 
-                      i + making_line_of_wires_begin.y * map_size.x;
-              Vecf real_position = { static_cast<float>(i) * CELLS_SIZE,  
-                                 static_cast<float>(making_line_of_wires_begin.y) * CELLS_SIZE };
-              temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                      position_in_vector, temporary_rotation);
-            }
+            spawn_begin = mouse_grid_position.x;
+            spawn_end = making_line_of_wires_begin.x;
           }
-          else{
-            temporary_rotation = kDirection_Down;
-            for(int i = making_line_of_wires_begin.y ;
-                    i <= mouse_grid_position.y ;
-                    ++i){
-              int position_in_vector = 
-                      making_line_of_wires_begin.x + i * map_size.x;
-              Vecf real_position = { static_cast<float>(making_line_of_wires_begin.x) * CELLS_SIZE,  
-                                 static_cast<float>(i) * CELLS_SIZE };
-              temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                      position_in_vector, temporary_rotation);
-            }
-          }
-        }
-        if(diff_x <= 0 && diff_y <= 0){
-          if(abs(diff_x) > abs(diff_y)){
+          
+          if(diff_x <= 0 && diff_y <= 0){
             temporary_rotation = kDirection_Left;
-            for(int i = making_line_of_wires_begin.x ;
-                    i >= mouse_grid_position.x ;
-                    --i){
-              int position_in_vector = 
-                      i + making_line_of_wires_begin.y * map_size.x;
-              Vecf real_position = { static_cast<float>(i) * CELLS_SIZE,  
-                                 static_cast<float>(making_line_of_wires_begin.y) * CELLS_SIZE };
-              temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                      position_in_vector, temporary_rotation);
-            }
+            spawn_begin = mouse_grid_position.x;
+            spawn_end = making_line_of_wires_begin.x;
           }
-          else{
-            temporary_rotation = kDirection_Up;
-            for(int i = making_line_of_wires_begin.y ;
-                    i >= mouse_grid_position.y ;
-                    --i){
-              int position_in_vector = 
-                      making_line_of_wires_begin.x + i * map_size.x;
-              Vecf real_position = { static_cast<float>(making_line_of_wires_begin.x) * CELLS_SIZE,  
-                                 static_cast<float>(i) * CELLS_SIZE };
-              temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                      position_in_vector, temporary_rotation);
-            }
-          }
-        }
-        if(diff_x >= 0 && diff_y <= 0){
-          if(diff_x > abs(diff_y)){
+            
+          if(diff_x >= 0 && diff_y <= 0){
             temporary_rotation = kDirection_Right;
-            for(int i = making_line_of_wires_begin.x ;
-                    i <= mouse_grid_position.x ;
-                    ++i){
-              int position_in_vector = 
-                      i + making_line_of_wires_begin.y * map_size.x;
-              Vecf real_position = { static_cast<float>(i) * CELLS_SIZE,  
-                                 static_cast<float>(making_line_of_wires_begin.y) * CELLS_SIZE };
-              temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                      position_in_vector, temporary_rotation);
-            }
+            spawn_begin = making_line_of_wires_begin.x;
+            spawn_end = mouse_grid_position.x;
           }
-          else{
+            
+        } else {
+          
+          
+          if(diff_x >= 0 && diff_y >= 0){
+            temporary_rotation = kDirection_Down;
+            spawn_begin = making_line_of_wires_begin.y;
+            spawn_end = mouse_grid_position.y;
+          }
+          
+          if(diff_x <= 0 && diff_y >= 0){
+            temporary_rotation = kDirection_Down;
+            spawn_begin = making_line_of_wires_begin.y;
+            spawn_end = mouse_grid_position.y;
+          }
+          
+          if(diff_x <= 0 && diff_y <= 0){
             temporary_rotation = kDirection_Up;
-            for(int i = making_line_of_wires_begin.y ;
-                    i >= mouse_grid_position.y ;
-                    --i){
-              int position_in_vector = 
-                      making_line_of_wires_begin.x + i * map_size.x;
-              Vecf real_position = { static_cast<float>(making_line_of_wires_begin.x) * CELLS_SIZE,  
-                                 static_cast<float>(i) * CELLS_SIZE };
+            spawn_begin = mouse_grid_position.y;
+            spawn_end = making_line_of_wires_begin.y;
+          }
+          
+          if(diff_x >= 0 && diff_y <= 0){
+            temporary_rotation = kDirection_Up;
+            spawn_begin = mouse_grid_position.y;
+            spawn_end = making_line_of_wires_begin.y;
+          }
+        }
+        
+        for(int i = spawn_begin ;
+                    i <= spawn_end ;
+                    ++i){ 
+          int position_in_vector = 0;
+          Vecf real_position = {0.0f, 0.0f};
+          if(temporary_rotation == kDirection_Right || 
+                  temporary_rotation == kDirection_Left){
+            position_in_vector = i + making_line_of_wires_begin.y * map_size.x;
+            real_position = { static_cast<float>(i) * CELLS_SIZE,  
+                static_cast<float>(making_line_of_wires_begin.y) * CELLS_SIZE };
+          }
+          else {
+            position_in_vector = making_line_of_wires_begin.x + i * map_size.x;
+            real_position = { 
+                static_cast<float>(making_line_of_wires_begin.x) * CELLS_SIZE,  
+                static_cast<float>(i) * CELLS_SIZE };
+          }
+          if(temporary_wire->type == kEditorObject_Wire){
+            temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+                  position_in_vector, temporary_rotation, temporary_wire->type);
+          } else{
+            if(i == making_line_of_wires_begin.x ||
+                    i == mouse_grid_position.x){
               temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                      position_in_vector, temporary_rotation);
+                  position_in_vector, temporary_rotation, temporary_wire->type);
+            } else{
+              temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+                  position_in_vector, temporary_rotation, kEditorObject_Wire_Underground);
             }
           }
-        }*/
-
+        }
       }
+             
+      
 
       bool pressed_rotate = false;
 
