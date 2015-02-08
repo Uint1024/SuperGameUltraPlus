@@ -25,6 +25,7 @@ rotate_key_press_timer(0){
   keymap[SDL_SCANCODE_5] = kKey_Not;
   keymap[SDL_SCANCODE_6] = kKey_Constant_1;
   keymap[SDL_SCANCODE_7] = kKey_ToolBar7;
+  keymap[SDL_SCANCODE_9] = kKey_ToolBar9;
   keymap[SDL_SCANCODE_Q] = kKey_Rotate_Left;
   keymap[SDL_SCANCODE_E] = kKey_Rotate_Right;
   keymap[SDL_SCANCODE_LSHIFT] = kKey_Select_To_Save;
@@ -37,6 +38,8 @@ rotate_key_press_timer(0){
   keymap[SDL_SCANCODE_DELETE] = kKey_Delete;
   keymap[SDL_SCANCODE_B] = kKey_Brush;
   keymap[SDL_SCANCODE_F] = kKey_Fill;
+  keymap[SDL_SCANCODE_PAGEDOWN] = kKey_Zoom_Out;
+  keymap[SDL_SCANCODE_BACKSPACE] = kKey_Backspace;
 }
 
 bool Input::PollEvents(GameData& game_data, Engine& engine) {
@@ -51,18 +54,18 @@ bool Input::PollEvents(GameData& game_data, Engine& engine) {
     rotate_key_press_timer += g_delta_t;
   }
   
-  if(game_data.save_gate_window){
+  if(game_data.create_label_mode){
     SDL_StartTextInput();
   }
   else{
     SDL_StopTextInput();
   }
   
+  std::string text_input;
   while (SDL_PollEvent(&e) != 0) {
     eKey key = kKey_None;
     //key = keymap[e.key.keysym.scancode];
     switch(e.type){
-      
       case SDL_QUIT:
         return false;
         break;
@@ -89,6 +92,9 @@ bool Input::PollEvents(GameData& game_data, Engine& engine) {
           mouse_buttons_down[kKey_Mouse_Rotate_Right] = true;
         }        
         break;
+      case SDL_TEXTINPUT:
+        text_input.append(e.text.text);
+        break;
     }
     
     if(game_data.save_gate_window) {
@@ -97,6 +103,7 @@ bool Input::PollEvents(GameData& game_data, Engine& engine) {
       }
     }    
   }
+  
   
   if(keys_down[kKey_Rotate_Left]){
     if(rotate_key_press_timer < delay_between_key_press) {
@@ -112,7 +119,8 @@ bool Input::PollEvents(GameData& game_data, Engine& engine) {
       rotate_key_press_timer = 0;
     }
   } 
-  Vecf movement = game_data.ReceiveInput(keys_down, 
+  Vecf movement = game_data.ReceiveInput(text_input,
+          keys_down, 
           mouse_buttons_down,
           mouse_position_in_window,
           mouse_position_in_world,

@@ -24,7 +24,7 @@ struct Wire {
   void CheckOutputToWire(std::vector<Wire*>& wire_map);
   void MoveElectrons(std::vector<Wire*>& wire_map, const Veci& map_size);
   void CheckIfHasEnergy(std::vector<std::array<Energy*, 4>>& energy_map);
-  void Rotate();
+  void Rotate(const eDirection direction);
   void ResetState();
   int position_in_array;
   SolidBody* body;
@@ -35,6 +35,8 @@ struct Wire {
   eEditorObject type;
   eDirection output_direction;
   int energy_value;
+  bool visible;
+  
 };
 
 #endif	/* WIRE_H */

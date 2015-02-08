@@ -28,6 +28,12 @@ Engine::Initialize(std::string window_name, const Veci window_size) {
     std::cout << SDL_GetError() << std::endl;
   }
   
+  font = TTF_OpenFont("LiberationSans-Regular.ttf", 22);
+  if (font == NULL)
+  {
+    std::cout << TTF_GetError() << std::endl;
+  }
+  
 	window = SDL_CreateWindow(window_name.c_str(),
 											SDL_WINDOWPOS_UNDEFINED,
 											SDL_WINDOWPOS_UNDEFINED,
@@ -143,13 +149,17 @@ Engine::Initialize(std::string window_name, const Veci window_size) {
     sprites_data[kTexture_Wire_Underground_0] = 
             SpriteData(logic_sprite_sheet, 0, src_rect, 0);
     
-    src_rect = {{26,88,22,22}};
-    sprites_data[kTexture_Wire_Underground_1] = 
-            SpriteData(logic_sprite_sheet, 0, src_rect, 0);
-    
-      src_rect = {{48,100,22,22}};
-    sprites_data[kTexture_Wire_Underground_Exit] = 
-            SpriteData(logic_sprite_sheet, 0, src_rect, 0);
+  src_rect = {{26,88,22,22}};
+  sprites_data[kTexture_Wire_Underground_1] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0);
+
+  src_rect = {{48,100,22,22}};
+  sprites_data[kTexture_Wire_Underground_Exit] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0);
+
+  src_rect = {{48,132,22,22}};
+  sprites_data[kTexture_Wire_Underground_SemiInvisible] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0);
   
 }
 

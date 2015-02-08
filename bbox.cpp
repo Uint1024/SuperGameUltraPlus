@@ -45,3 +45,11 @@ Bbox::CollisionWithBbox(const Bbox& other) {
   return false;
 }
 
+void 
+Bbox::Resize(const Veci& size_) {
+  size = size_;
+  right = left + size.x;
+  bottom = top + size.y;
+  
+}
+

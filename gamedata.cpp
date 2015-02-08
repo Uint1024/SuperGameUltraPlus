@@ -1,4 +1,5 @@
 #include <iostream>
+#include "label.h"
 #include "gamedata.h"
 #include "engine.h"
 #include "wire.h"
@@ -10,7 +11,7 @@
 #include "three_state.h"
 #include <memory>
 
-const int CELLS_SIZE = 22;
+int CELLS_SIZE = 22;
 const int PIXEL_SIZE = 2;
 
 GameData::GameData(const Veci& window_size) :
@@ -29,7 +30,9 @@ temporary_wire(nullptr)
 ,paste_mode(false)
 ,mouse_collide_with_object(false)
 ,brush_color(kColor_Black),
-brush_mode(false){
+brush_mode(false),
+create_label_mode(false),
+temporary_label(nullptr){
   int map_size_total = map_size.x * map_size.y;
   //wire_map.reserve(map_size.x * map_size.y);
   for(int i = 0 ; i < map_size_total ; ++i){
@@ -61,7 +64,7 @@ brush_mode(false){
     color_map.push_back(kColor_None);
   }
   
- 
+
 }
 
 void
@@ -128,11 +131,11 @@ GameData::Render(Engine& engine) {
     }
   }
   
-  for(auto &wire : wire_map_underground){  
+  /*for(auto &wire : wire_map_underground){  
     if(wire){
       wire->body->Render(engine);
     }
-  }
+  }*/
   
   for(auto &wire : wire_map){  
     if(wire){
@@ -155,6 +158,12 @@ GameData::Render(Engine& engine) {
   for(auto &logic_gate : logic_gate_map){
     if(logic_gate){
       logic_gate->body->Render(engine);
+    }
+  }
+  
+  for(int i = 0 ; i < wire_map_underground.size() ; i++){
+    if(wire_map_underground[i]){
+        wire_map_underground[i]->body->Render(engine);
     }
   }
   
@@ -210,6 +219,17 @@ GameData::Render(Engine& engine) {
 
     SDL_SetRenderDrawColor(engine.renderer, 255, 0, 0, 255);
     SDL_RenderDrawRect(engine.renderer, &selection_rect);
+  }
+  
+  if(create_label_mode){
+    if(temporary_label){
+      temporary_label->Render(engine);
+    }
+  }
+  
+  for(auto &label : labels){
+      label.Render(engine);
+      
   }
 }
 
@@ -299,14 +319,55 @@ GameData::BrushMode( const std::array<bool, kKey_Count>& keys_down,
 
 
 Vecf 
-GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down, 
+GameData::ReceiveInput( std::string text_input, 
+                        const std::array<bool, kKey_Count>& keys_down, 
                         const std::array<bool, 255 > & mouse_buttons_down, 
                         const Veci& mouse_position_in_window,
                         const Vecf& mouse_position_in_world,
                         const std::array<bool, kKey_Count>& last_keys_down,
         const std::array<bool, 255>& last_mouse_buttons_down) {
-pressed_rotate = false;
-  if(brush_mode){
+  pressed_rotate = false;
+
+  if(create_label_mode){
+    Clean();
+    if(text_input.length() > 0){
+      temporary_label_string.append(text_input);
+      delete temporary_label;
+      temporary_label = nullptr;
+      temporary_label = new Label(temporary_label_position, temporary_label_string);
+    }
+    
+    if(keys_down[kKey_Backspace] && !last_keys_down[kKey_Backspace]){
+      if (temporary_label_string.size() > 0){
+        temporary_label_string.pop_back();
+      }
+      
+      delete temporary_label;
+      temporary_label = nullptr;
+      temporary_label = new Label(temporary_label_position, temporary_label_string);
+    }
+   
+    if(keys_down[kKey_Enter] && !last_keys_down[kKey_Enter]){
+      std::cout << labels.size() << std::endl;
+      labels.push_back(Label(temporary_label_position, temporary_label_string));
+      temporary_label_string.clear();
+      create_label_mode = false;
+    }
+
+    if(keys_down[kKey_ToolBar9] && !last_keys_down[kKey_ToolBar9]){
+      create_label_mode = false;
+      temporary_label_string.clear();
+    }
+  } else {
+    
+    if(keys_down[kKey_ToolBar9] && !last_keys_down[kKey_ToolBar9]){
+      temporary_label_position = mouse_world_position;
+      create_label_mode = true;
+      temporary_label_string.clear();
+    }
+  }
+  if(brush_mode && !create_label_mode){
+    Clean();
     BrushMode(keys_down, mouse_buttons_down, 
               mouse_position_in_window,
               mouse_position_in_world,
@@ -323,7 +384,16 @@ pressed_rotate = false;
     }
   }
   
-
+  if(keys_down[kKey_Zoom_Out] &&
+          !last_keys_down[kKey_Zoom_Out]){
+  CELLS_SIZE -= 1;
+  
+    for(auto &i : wire_map){
+      if(i){
+        i->body->bbox.Resize(Veci{CELLS_SIZE, CELLS_SIZE});
+      }
+    }
+  }
 
   if(keys_down[kKey_Speed_Down] &&
           !last_keys_down[kKey_Speed_Down]){
@@ -411,8 +481,9 @@ pressed_rotate = false;
   }
   */
   
-  if(paste_mode && !brush_mode){
-   // Clean();
+  if(paste_mode && !brush_mode && !create_label_mode){
+    
+    Clean();
     MoveClipboardObjects();
     if(mouse_buttons_down[SDL_BUTTON_LEFT]){
       PasteClipboardObjects();
@@ -483,7 +554,13 @@ pressed_rotate = false;
       
     }//if !selecting_area
   }//if wanting to paste
-  Vecf player_movement = player.ReceiveInput(keys_down, mouse_buttons_down);
+  
+  Vecf player_movement = {0,0};
+  
+  if(!create_label_mode){
+    
+    player_movement = player.ReceiveInput(keys_down, mouse_buttons_down);
+  }
   
   
   if(mouse_buttons_down[SDL_BUTTON_LEFT]){
@@ -623,7 +700,7 @@ GameData::Update() {
       Wire* wire = wire_map[i];
       if(wire){
         wire->CheckIfHasEnergy(energy_map);
-        if(wire->type == kEditorObject_Wire_Underground_Exit){
+        /*if(wire->type == kEditorObject_Wire_Underground_Exit){
           wire->CheckIfHasEnergy(energy_map_underground);
         }
 
@@ -648,7 +725,7 @@ GameData::Update() {
               energy_map_underground[direction_grid_position[direction]][direction]->value = wire_map[i]->energy_value;
             }
 
-        }
+        }*/
       
       }
     }
@@ -835,8 +912,6 @@ GameData::CopySelectionToClipboard() {
 void GameData::PasteClipboardObjects() {
   for(int y = 0 ; y < clipboard_size.y ; y++){
     for(int x = 0 ; x < clipboard_size.x ; x++){
-      
-
       int vector_pos = x + y * clipboard_size.x;
       
       int vector_pos_in_real_map = 
@@ -852,6 +927,9 @@ void GameData::PasteClipboardObjects() {
         delete logic_gate_map[vector_pos_in_real_map];
         logic_gate_map[vector_pos_in_real_map] = nullptr;
 
+        delete wire_map[vector_pos_in_real_map];
+        wire_map[vector_pos_in_real_map] = nullptr;
+        
         switch(gate->object_type){
           case kEditorObject_Not:
             logic_gate_map[vector_pos_in_real_map] = 
@@ -889,6 +967,10 @@ void GameData::PasteClipboardObjects() {
 
         delete wire_map[vector_pos_in_real_map];
         wire_map[vector_pos_in_real_map] = nullptr;
+        delete wire_map_underground[vector_pos_in_real_map];
+        wire_map_underground[vector_pos_in_real_map] = nullptr;
+        delete logic_gate_map[vector_pos_in_real_map];
+        logic_gate_map[vector_pos_in_real_map] = nullptr;
         wire_map[vector_pos_in_real_map] = 
                 new Wire(Vecf{wire->body->bbox.left, wire->body->bbox.top},
                    vector_pos_in_real_map, wire->body->direction,
@@ -1064,29 +1146,6 @@ void GameData::CheckMouseObjectsCollision(const std::array<bool, kKey_Count>& ke
         Clean();
       }
     }
-
-      /*if(temporary_gate) {
-        if(gate->body->bbox.CollisionWithPoint(mouse_position_in_world)) {
-          mouse_collide_with_object = true;
-          if(pressed_rotate) {
-            gate->Rotate(temporary_rotation, map_size);
-          }
-
-          Clean();
-          break;
-        }
-      }
-      else if(temporary_wire) {
-          if(gate->body->bbox.CollisionWithPoint(mouse_position_in_world)) {
-          mouse_collide_with_object = true;
-          if(pressed_rotate) {
-            gate->Rotate(temporary_rotation, map_size);
-          }
-          Clean();
-          break;
-        }
-      }
-    }*/
   }
   for(auto &wire : wire_map) {
     if(wire) {
@@ -1094,34 +1153,26 @@ void GameData::CheckMouseObjectsCollision(const std::array<bool, kKey_Count>& ke
         mouse_collide_with_object = true;
         Clean();
         if(pressed_rotate) {
-            wire->body->direction = temporary_rotation;
+          wire->Rotate(temporary_rotation);
         }
       }
-      
-      
-      
     }
-      /*if(temporary_gate) {
-        temp_collision = wire->body->bbox.CollisionWithPoint(mouse_position_in_world);
-        if(temp_collision) {
-          if(pressed_rotate){
-            wire->body->direction = temporary_rotation;
-          }
-          Clean();
-          break;
-        }
+  }
+  
+  for(auto i = labels.begin() ; i < labels.end() ;){
+    bool erase = false;
+    if(i->bbox.CollisionWithPoint((mouse_position_in_world))){
+      //mouse_collide_with_object = true;
+      //Clean();
+      
+      if(keys_down[kKey_Delete]){
+        labels.erase(i);
+        erase = true;
       }
-      if(temporary_wire) {
-        temp_collision = wire->body->bbox.CollisionWithPoint(mouse_position_in_world);
-        if(temp_collision) {
-          if(pressed_rotate){
-            wire->body->direction = temporary_rotation;
-          }
-          Clean();
-          break;
-        }
-      }
-    }*/
+    }
+    if(!erase){
+      ++i;
+    }
   }
 }
 
@@ -1230,7 +1281,7 @@ GameData::CheckItemSelectionKeys(const std::array<bool, kKey_Count>& keys_down) 
 
 void 
 GameData::UpdateMousePosition(const Vecf& mouse_position_in_world) {
-
+  mouse_world_position = mouse_position_in_world;
   mouse_grid_position = {static_cast<int>(mouse_position_in_world.x)/CELLS_SIZE,
                          static_cast<int>(mouse_position_in_world.y)/CELLS_SIZE};
   

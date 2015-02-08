@@ -35,9 +35,10 @@ high_resolution_clock_time_point (*TimeNow)() =
 int main(int argc, char** argv) {
   std::string window_name = "Electron Simulator";
   Veci window_size{1280, 720};
-  
-  GameData game_data(window_size);
   Engine engine;
+  engine.Initialize(window_name, window_size);
+  GameData game_data(window_size);
+  
   Input input;
 
   /*Used to calculate delta_t*/
@@ -50,7 +51,7 @@ int main(int argc, char** argv) {
   
   bool running = true;
   
-  engine.Initialize(window_name, window_size);
+  
   
   //limit to 120 fps (= 1 frame every 15 ms)
   while (running) {

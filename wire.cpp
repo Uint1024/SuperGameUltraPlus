@@ -14,7 +14,8 @@ position_in_array(position_in_array),
 visited(false),
 type(type),
 output_direction(direction),
-energy_value(100){
+energy_value(100),
+visible(true){
   switch(type){
     case kEditorObject_Wire:
       body->sprite.texture_id = kTexture_Wire_Empty;
@@ -31,8 +32,9 @@ energy_value(100){
 Wire::~Wire(){
   delete body;
 }
-void Wire::Rotate() {
-  
+void Wire::Rotate(const eDirection direction) {
+  body->direction = direction;
+  output_direction = direction;
 }
 
 void 
@@ -97,7 +99,7 @@ Wire::CheckIfHasEnergy(std::vector<std::array<Energy*, 4>>& energy_map) {
     }
   }
     
-  if(type == kEditorObject_Wire_Underground){
+  if(type == kEditorObject_Wire_Underground && visible == true){
     switch(logical_state){
       case kLogicalState_0:
         body->sprite.texture_id = kTexture_Wire_Underground_0;
@@ -110,6 +112,25 @@ Wire::CheckIfHasEnergy(std::vector<std::array<Energy*, 4>>& energy_map) {
         break;
       case kLogicalState_Error:
         body->sprite.texture_id = kTexture_Wire_Underground;
+        break;
+      default:
+        std::cout << "Error, unknown state." << std::endl;
+        break;
+    }
+  }
+  if(type == kEditorObject_Wire_Underground && visible == false){
+    switch(logical_state){
+      case kLogicalState_0:
+        body->sprite.texture_id = kTexture_Wire_Underground_SemiInvisible;
+        break;
+      case kLogicalState_1:
+        body->sprite.texture_id = kTexture_Wire_Underground_SemiInvisible;
+        break;
+      case kLogicalState_Empty:
+        body->sprite.texture_id = kTexture_Wire_Underground_SemiInvisible;
+        break;
+      case kLogicalState_Error:
+        body->sprite.texture_id = kTexture_Wire_Underground_SemiInvisible;
         break;
       default:
         std::cout << "Error, unknown state." << std::endl;

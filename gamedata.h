@@ -11,6 +11,8 @@
 #include <vector>
 #include <array>
 #include <list>
+#include "SDL_ttf.h"
+#include "label.h"
 #include "logicgate.h"
 #include "energy.h"
 #include "save_gate_window.h"
@@ -23,7 +25,8 @@ struct GameData{
   GameData(const Veci& window_size);
   void InitializeWorld(const Veci& window_size);
   void Render(Engine& engine);
-  Vecf ReceiveInput(const std::array<bool, kKey_Count>& keys_down, 
+  Vecf ReceiveInput(std::string text_input, 
+  const std::array<bool, kKey_Count>& keys_down, 
           const std::array<bool, 255>& mouse_buttons_down,
           const Veci& mouse_position_in_window,
           const Vecf& mouse_position_in_world,
@@ -70,6 +73,9 @@ struct GameData{
   std::vector<eColor> color_map;
   std::vector<eColor> clipboard_color_map;
   
+  std::vector<Label> labels;
+  bool create_label_mode;
+  
   std::vector<LogicGate*> clipboard_gates;
   std::vector<Wire*> clipboard_wires;
   std::vector<Wire*> clipboard_wires_underground;
@@ -79,7 +85,7 @@ struct GameData{
   Veci mouse_grid_position;
   int mouse_vector_position;
   Vecf grid_position_position;
-  
+  Vecf mouse_world_position;
   LogicGate* temporary_gate;
   Wire* temporary_wire;
   eDirection temporary_rotation;
@@ -104,6 +110,11 @@ struct GameData{
   
   bool mouse_collide_with_object;
   bool pressed_rotate;
+  
+  std::string temporary_label_string;
+  Label* temporary_label;
+  Vecf temporary_label_position;
+  //TTF_Font* font;
 };
 
 #endif	/* GAMEDATA_H */

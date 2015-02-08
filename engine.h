@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include "SDL_ttf.h"
 #include "SDL.h"
 #include "utils.h"
 #include "sprite_data.h"
@@ -32,6 +33,7 @@ struct Engine {
   //access using the eTexture enum
   std::array<SpriteData, kTexture_Count> sprites_data;
    Vecf camera;
+   TTF_Font* font;
    
 };
 

@@ -16,7 +16,7 @@ void StaticBody::Render(Engine& engine) {
   
   SDL_Rect dest_rect = {
           static_cast<int>(bbox.left) - static_cast<int>(engine.camera.x), 
-          static_cast<int>(bbox.top) - static_cast<int>(engine.camera.y), 
+          static_cast<int>(bbox.top) - static_cast<int>(engine.camera.y),
           bbox.size.x, 
           bbox.size.y};
   SDL_Rect* src_rect =  &data->src_rect[sprite.current_frame];

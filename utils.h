@@ -53,6 +53,7 @@ enum eKey {
   kKey_ToolBar1,
   kKey_ToolBar2,
   kKey_ToolBar7,
+  kKey_ToolBar9,
   kKey_And,
   kKey_Not,
   kKey_Constant_1,
@@ -62,6 +63,8 @@ enum eKey {
   kKey_Workshop,
   kKey_Copy,
   kKey_Paste,
+  kKey_Zoom_Out,
+  kKey_Zoom_In,
   
   kKey_Select,
   kKey_Delete,
@@ -73,6 +76,7 @@ enum eKey {
   kKey_ToggleHeight,
   kKey_Select_To_Save,
   kKey_Enter,
+  kKey_Backspace,
   kKey_None,
   kKey_Rotate_Left,
   kKey_Rotate_Right,
@@ -116,6 +120,7 @@ enum eTexture {
   kTexture_Wire_Underground,
   kTexture_Wire_Underground_0,
   kTexture_Wire_Underground_1,
+  kTexture_Wire_Underground_SemiInvisible,
   kTexture_Wire_Underground_Exit,
   kTexture_Constant_1,
   kTexture_Constant_0,
@@ -147,7 +152,7 @@ using high_resolution_clock_time_point =
 
 extern high_resolution_clock_time_point (*TimeNow)();
 
-extern const int CELLS_SIZE;
+extern int CELLS_SIZE;
 extern const int PIXEL_SIZE;
 using milliseconds = std::chrono::milliseconds;
 
