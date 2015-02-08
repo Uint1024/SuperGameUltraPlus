@@ -52,11 +52,13 @@ enum eKey {
   kKey_Right,
   kKey_ToolBar1,
   kKey_ToolBar2,
+  
   kKey_ToolBar7,
+  kKey_ToolBar8,
   kKey_ToolBar9,
-  kKey_And,
-  kKey_Not,
-  kKey_Constant_1,
+  kKey_ToolBar4,
+  kKey_ToolBar5,
+  kKey_ToolBar6,
   kKey_Constant_0,
   kKey_ToolBar3,
   kKey_Inventory,
@@ -77,6 +79,9 @@ enum eKey {
   kKey_Select_To_Save,
   kKey_Enter,
   kKey_Backspace,
+  kKey_QuickSave,
+  kKey_QuickLoad,
+  kKey_CreateLabel,
   kKey_None,
   kKey_Rotate_Left,
   kKey_Rotate_Right,
@@ -141,10 +146,16 @@ enum eDirection {
 };
 
 enum eColor {
-  kColor_White,
+  kColor_White,//1
+  kColor_Grey,//2
   kColor_Black,
   kColor_Green,
+  kColor_LightBlue,
+  kColor_DarkBlue,
+  
   kColor_Orange,
+  kColor_Red,
+  kColor_Pink,
   kColor_None
 };
 using high_resolution_clock_time_point = 

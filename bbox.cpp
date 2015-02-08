@@ -53,3 +53,9 @@ Bbox::Resize(const Veci& size_) {
   
 }
 
+Vecf 
+Bbox::GetCoordinates() {
+  return Vecf{left, top};
+}
+
+

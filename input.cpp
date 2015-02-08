@@ -21,11 +21,12 @@ rotate_key_press_timer(0){
   keymap[SDL_SCANCODE_1] = kKey_ToolBar1;
   keymap[SDL_SCANCODE_2] = kKey_ToolBar2;
   keymap[SDL_SCANCODE_3] = kKey_ToolBar3;
-  keymap[SDL_SCANCODE_4] = kKey_And;
-  keymap[SDL_SCANCODE_5] = kKey_Not;
-  keymap[SDL_SCANCODE_6] = kKey_Constant_1;
+  keymap[SDL_SCANCODE_4] = kKey_ToolBar4;
+  keymap[SDL_SCANCODE_5] = kKey_ToolBar5;
+  keymap[SDL_SCANCODE_6] = kKey_ToolBar6;
   keymap[SDL_SCANCODE_7] = kKey_ToolBar7;
   keymap[SDL_SCANCODE_9] = kKey_ToolBar9;
+  keymap[SDL_SCANCODE_EQUALS] = kKey_CreateLabel;
   keymap[SDL_SCANCODE_Q] = kKey_Rotate_Left;
   keymap[SDL_SCANCODE_E] = kKey_Rotate_Right;
   keymap[SDL_SCANCODE_LSHIFT] = kKey_Select_To_Save;
@@ -40,6 +41,8 @@ rotate_key_press_timer(0){
   keymap[SDL_SCANCODE_F] = kKey_Fill;
   keymap[SDL_SCANCODE_PAGEDOWN] = kKey_Zoom_Out;
   keymap[SDL_SCANCODE_BACKSPACE] = kKey_Backspace;
+  keymap[SDL_SCANCODE_F5] = kKey_QuickSave;
+  keymap[SDL_SCANCODE_F9] = kKey_QuickLoad;
 }
 
 bool Input::PollEvents(GameData& game_data, Engine& engine) {

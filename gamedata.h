@@ -34,13 +34,15 @@ struct GameData{
           const std::array<bool, 255>& last_mouse_buttons_down);
   void CreateSingleObject();
   void DeleteSingleObject(const Vecf& mouse_position_in_world);
-  void CheckItemSelectionKeys(const std::array<bool, kKey_Count>& keys_down);
+  void CheckItemSelectionKeys(const std::array<bool, kKey_Count>& keys_down,
+  const std::array<bool, kKey_Count>& last_keys_down);
   void UpdateMousePosition(const Vecf& mouse_position_in_world);
   void DeleteSelection();
   void CopySelectionToClipboard();
   void MoveClipboardObjects();
   void PasteClipboardObjects();
   void CreateLineOfWires();
+  
   void CheckMouseObjectsCollision(const std::array<bool, kKey_Count>& keys_down,
                         const std::array<bool, 255 >& mouse_buttons_down, 
                         const Veci& mouse_position_in_window,
@@ -60,6 +62,9 @@ struct GameData{
   void TransmitEnergyValue();
   void RenderColorSquare(Engine& engine, const eColor ecolor, 
         const int x, const int y);
+  void Save(std::string file_name);
+  void Load(std::string file_name);
+  inline void CheckUniqueKeyPress();
   Player player;
   Veci map_size;
   //grid of energy, each cell can have 4 "energy" objects, 1 from each direction
@@ -114,7 +119,8 @@ struct GameData{
   std::string temporary_label_string;
   Label* temporary_label;
   Vecf temporary_label_position;
-  //TTF_Font* font;
+  
+  std::map<eKey, eEditorObject> last_selected_toolbar_item;
 };
 
 #endif	/* GAMEDATA_H */

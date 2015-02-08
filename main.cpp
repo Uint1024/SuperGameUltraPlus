@@ -34,7 +34,7 @@ high_resolution_clock_time_point (*TimeNow)() =
 
 int main(int argc, char** argv) {
   std::string window_name = "Electron Simulator";
-  Veci window_size{1280, 720};
+  Veci window_size{1366, 768};
   Engine engine;
   engine.Initialize(window_name, window_size);
   GameData game_data(window_size);

@@ -16,6 +16,7 @@ struct Bbox {
   bool CollisionWithPoint(const Vecf& point);
   bool CollisionWithBbox(const Bbox& other);
   void Resize(const Veci& size_);
+  Vecf GetCoordinates();
   float top, left, bottom, right;
   Veci size;
 };
