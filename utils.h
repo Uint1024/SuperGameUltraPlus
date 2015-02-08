@@ -28,6 +28,7 @@ enum eEditorObject {
   kEditorObject_Constant_1,
   kEditorObject_Constant_0,
   kEditorObject_Separator,
+  kEditorObject_ThreeState,
   kEditorObject_None,
   kEditorObject_Count
 };
@@ -49,28 +50,23 @@ enum eKey {
   kKey_Down,
   kKey_Left,
   kKey_Right,
-  kKey_Wire,
-  kKey_Wire_Underground_Exit,
+  kKey_ToolBar1,
+  kKey_ToolBar2,
+  kKey_ToolBar7,
   kKey_And,
   kKey_Not,
   kKey_Constant_1,
   kKey_Constant_0,
-  kKey_Separator,
+  kKey_ToolBar3,
   kKey_Inventory,
   kKey_Workshop,
-  kKey_Gate_1,
-  kKey_Gate_2,
-  kKey_Gate_3,
-  kKey_Gate_4,
-  kKey_Gate_5,
-  kKey_Gate_6,
-  kKey_Gate_7,
-  kKey_Gate_8,
-  kKey_Gate_9,
   kKey_Copy,
   kKey_Paste,
+  
   kKey_Select,
   kKey_Delete,
+  kKey_Brush,
+  kKey_Fill,
   kKey_Load,
   kKey_Raise,
   kKey_Lower,
@@ -123,6 +119,9 @@ enum eTexture {
   kTexture_Wire_Underground_Exit,
   kTexture_Constant_1,
   kTexture_Constant_0,
+  kTexture_ThreeState_0,
+  kTexture_ThreeState_1,
+  kTexture_ThreeState_Empty,
   
   kTexture_None,
   kTexture_Count
@@ -136,12 +135,20 @@ enum eDirection {
   kDirection_Count
 };
 
+enum eColor {
+  kColor_White,
+  kColor_Black,
+  kColor_Green,
+  kColor_Orange,
+  kColor_None
+};
 using high_resolution_clock_time_point = 
         std::chrono::time_point<std::chrono::high_resolution_clock>;
 
 extern high_resolution_clock_time_point (*TimeNow)();
 
 extern const int CELLS_SIZE;
+extern const int PIXEL_SIZE;
 using milliseconds = std::chrono::milliseconds;
 
 extern int g_delta_t;

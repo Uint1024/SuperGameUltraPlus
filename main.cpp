@@ -58,11 +58,10 @@ int main(int argc, char** argv) {
     diff = current - last;
     g_delta_t += std::chrono::duration_cast<milliseconds>(diff).count();
     
-    if (g_delta_t >= 8) {  
+    if (g_delta_t >= 2) {  
       running = input.PollEvents(game_data, engine);
       game_data.Update();
       engine.Render(game_data);
-      //game_data.ResetWiresVisitedState();
       g_delta_t = 0;
     } 
     

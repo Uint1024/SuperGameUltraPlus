@@ -7,9 +7,11 @@
 #include "not_gate.h"
 #include "separator.h"
 #include "save_gate_window.h"
+#include "three_state.h"
 #include <memory>
 
 const int CELLS_SIZE = 22;
+const int PIXEL_SIZE = 2;
 
 GameData::GameData(const Veci& window_size) :
 player(Vecf{window_size.x/2.0f, window_size.y/2.0f}),
@@ -24,7 +26,10 @@ temporary_wire(nullptr)
 ,save_gate_window(nullptr)
 ,selecting_area(false)
 ,selected_area(false)
-,wanting_to_paste(false){
+,paste_mode(false)
+,mouse_collide_with_object(false)
+,brush_color(kColor_Black),
+brush_mode(false){
   int map_size_total = map_size.x * map_size.y;
   //wire_map.reserve(map_size.x * map_size.y);
   for(int i = 0 ; i < map_size_total ; ++i){
@@ -51,6 +56,11 @@ temporary_wire(nullptr)
   for(int i = 0 ; i < map_size_total ; ++i){
     energy_map_underground.push_back(std::array<Energy*, 4>{nullptr});
   }
+  
+  for(int i = 0 ; i < map_size_total ; ++i){
+    color_map.push_back(kColor_None);
+  }
+  
  
 }
 
@@ -59,9 +69,64 @@ GameData::InitializeWorld(const Veci& window_size) {
   //player = Player(Vecf{window_size.x/2.0f, window_size.y/2.0f});
 }
 
+void GameData::RenderColorSquare(Engine& engine, const eColor ecolor, 
+        const int x, const int y) {
+    SDL_Color color = {255,255,255,255};
+    switch(ecolor){
+      case kColor_Black:
+        color = {0,0,0,255};
+        break;
+      case kColor_White:
+       color = {255,255,255,255};
+       break;
+      case kColor_Green:
+        color = {62,152,87,255};
+        break;
+    }
+    
+    SDL_SetRenderDrawColor(engine.renderer, color.r, color.g, color.b, color.a);
+    SDL_Rect rect = { static_cast<int>(x), 
+                      static_cast<int>(y), 
+                      CELLS_SIZE, CELLS_SIZE};
+    SDL_RenderFillRect(engine.renderer, &rect);
+}
+
 void 
 GameData::Render(Engine& engine) {
-
+  
+  if(paste_mode){
+    int x = 0;
+    int y = 0;
+    for(int i = 0 ; i < clipboard_color_map.size() ; i++){
+    
+    if(clipboard_color_map[i] != kColor_None){
+      RenderColorSquare(engine, clipboard_color_map[i], 
+              x * CELLS_SIZE - engine.camera.x + mouse_grid_position.x * CELLS_SIZE, 
+              y * CELLS_SIZE - engine.camera.y + mouse_grid_position.y * CELLS_SIZE);
+    }
+    ++x;
+    if(x == clipboard_size.x){
+      x = 0;
+      ++y;
+    }
+    }
+  }
+  
+  int x = 0;
+  int y = 0;
+  for(int i = 0 ; i < color_map.size() ; i++){
+    
+    if(color_map[i] != kColor_None){
+      RenderColorSquare(engine, color_map[i], 
+              x * CELLS_SIZE  - engine.camera.x, 
+              y * CELLS_SIZE  - engine.camera.y);
+    }
+    ++x;
+    if(x == map_size.x){
+      x = 0;
+      ++y;
+    }
+  }
   
   for(auto &wire : wire_map_underground){  
     if(wire){
@@ -103,11 +168,18 @@ GameData::Render(Engine& engine) {
     temporary_wire->body->Render(engine);
   }
   
+  if(brush_mode){
+    RenderColorSquare(engine, brush_color, 
+            mouse_grid_position.x * CELLS_SIZE - engine.camera.x,
+            mouse_grid_position.y * CELLS_SIZE - engine.camera.y);
+
+  }
+  
   if(save_gate_window){
     save_gate_window->Render(engine);
   }
   
-  if(wanting_to_paste){
+  if(paste_mode){
     for(auto &gate : clipboard_gates){
       if(gate){
         gate->body->Render(engine);
@@ -123,6 +195,7 @@ GameData::Render(Engine& engine) {
         wire->body->Render(engine);
       }
     }
+    
   }
   if(selecting_area || selected_area){
     
@@ -146,6 +219,9 @@ void GameData::CreateTemporaryObject(const eEditorObject object_type, const Vecf
     case kEditorObject_And:
       temporary_gate = new AndGate(position, temporary_rotation, 0, map_size);
       break;
+    case kEditorObject_ThreeState:
+      temporary_gate = new ThreeState(position, temporary_rotation, 0, map_size);
+      break;
     case kEditorObject_Not:
       temporary_gate = new NotGate(position, temporary_rotation, 0, map_size);
       break;
@@ -167,6 +243,60 @@ void GameData::CreateTemporaryObject(const eEditorObject object_type, const Vecf
   }
 }
 
+void 
+GameData::BrushMode( const std::array<bool, kKey_Count>& keys_down, 
+        const std::array<bool, 255 > & mouse_buttons_down, 
+                        const Veci& mouse_position_in_window,
+                        const Vecf& mouse_position_in_world,
+                        const std::array<bool, kKey_Count>& last_keys_down,
+        const std::array<bool, 255>& last_mouse_buttons_down) {
+  
+  if(keys_down[kKey_ToolBar1]){
+    brush_color = kColor_Black;
+  }
+  if(keys_down[kKey_ToolBar2]){
+    brush_color = kColor_White;
+  }
+  if(keys_down[kKey_ToolBar3]){
+    brush_color = kColor_Green;
+  }
+  if(mouse_buttons_down[SDL_BUTTON_LEFT]){
+    color_map[mouse_vector_position] = brush_color;
+  }
+  if(mouse_buttons_down[SDL_BUTTON_RIGHT]){
+    color_map[mouse_vector_position] = kColor_None;
+  }
+  
+  if((keys_down[kKey_Fill] || keys_down[kKey_Delete] )&& selected_area){
+    Veci selection_begin_copy = selection_grid_position_begin;
+    Veci selection_end_copy = selection_grid_position_end;
+
+    if(selection_grid_position_begin.x > selection_grid_position_end.x){
+      selection_grid_position_begin.x = selection_grid_position_end.x;
+      selection_grid_position_end.x = selection_begin_copy.x;
+    }
+    if(selection_grid_position_end.y < selection_grid_position_begin.y){
+      selection_grid_position_begin.y = selection_grid_position_end.y;
+      selection_grid_position_end.y = selection_begin_copy.y;
+    }
+
+    int position_in_vector= 0;
+    for(int y = selection_grid_position_begin.y ; 
+                y < selection_grid_position_end.y; ++y){
+      for(int x = selection_grid_position_begin.x ; 
+                x < selection_grid_position_end.x ; ++x){
+
+          position_in_vector = x + map_size.x * y;
+          
+          color_map[position_in_vector] = 
+                  keys_down[kKey_Fill]? brush_color : kColor_None;
+        }
+    }
+    
+    selected_area = false;
+  }
+}
+
 
 Vecf 
 GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down, 
@@ -175,67 +305,46 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
                         const Vecf& mouse_position_in_world,
                         const std::array<bool, kKey_Count>& last_keys_down,
         const std::array<bool, 255>& last_mouse_buttons_down) {
+pressed_rotate = false;
+  if(brush_mode){
+    BrushMode(keys_down, mouse_buttons_down, 
+              mouse_position_in_window,
+              mouse_position_in_world,
+              last_keys_down,
+              last_mouse_buttons_down);
+    
+    if(keys_down[kKey_Brush] && !last_keys_down[kKey_Brush]){
+      brush_mode = false;
+    }
+  }
+  else{
+    if(keys_down[kKey_Brush] && !last_keys_down[kKey_Brush]){
+      brush_mode = true;
+    }
+  }
+  
 
-      CreateTemporaryObject(currently_selected_object, grid_position_position);
 
-  if(keys_down[kKey_Speed_Down]){
+  if(keys_down[kKey_Speed_Down] &&
+          !last_keys_down[kKey_Speed_Down]){
     if(update_delay < 1000){
-      update_delay += 100;
+      update_delay += 16;
+      std::cout << "Update delay now " << update_delay << " ms." << std::endl;
     }
   }
-  if(keys_down[kKey_Speed_Up]){
-    if(update_delay >= 100){
-      update_delay -= 100;
+  if(keys_down[kKey_Speed_Up] &&
+          !last_keys_down[kKey_Speed_Up]){
+    if(update_delay >= 16){
+      update_delay -= 16;
+      std::cout << "Update delay now " << update_delay << " ms." << std::endl;
     }
   }
-      
-      bool pressed_object_selection_key = false;
 
-  if(keys_down[kKey_Constant_1]){
-    currently_selected_object = kEditorObject_Constant_1;
-    pressed_object_selection_key = true;
-  }
+  CheckItemSelectionKeys(keys_down);
+  UpdateMousePosition(mouse_position_in_world);
+  mouse_collide_with_object = false;
+ 
 
-  if(keys_down[kKey_And]){
-    currently_selected_object = kEditorObject_And;
-    pressed_object_selection_key = true;
-  }
-
-  if(keys_down[kKey_Not]){
-    currently_selected_object = kEditorObject_Not;
-    pressed_object_selection_key = true;
-  }
-  
-  if(keys_down[kKey_Wire]){
-    currently_selected_object = kEditorObject_Wire;
-    pressed_object_selection_key = true;
-  }
-      
-  if(keys_down[kKey_Wire_Underground_Exit]){
-    currently_selected_object = kEditorObject_Wire_Underground_Exit;
-    pressed_object_selection_key = true;
-  }
-
-  if(keys_down[kKey_Separator]){
-    currently_selected_object = kEditorObject_Separator;
-    pressed_object_selection_key = true;
-  }
-      
-  if(pressed_object_selection_key){
-    wanting_to_paste = false;
-  }
-
-      
-  //position of the mouse on the map grid, so {5, 10} is the 5th column, 10th row
-  mouse_grid_position = {static_cast<int>(mouse_position_in_world.x)/CELLS_SIZE,
-                         static_cast<int>(mouse_position_in_world.y)/CELLS_SIZE};
-  
-  grid_position_position = { static_cast<float>(mouse_grid_position.x) * CELLS_SIZE,  
-                             static_cast<float>(mouse_grid_position.y) * CELLS_SIZE };
-  
-  int position_in_vector = 
-                  mouse_grid_position.x + mouse_grid_position.y * map_size.x;
-  
   if(keys_down[kKey_Select_To_Save]){
     if(!selecting_area){
       selecting_area = true;
@@ -252,227 +361,19 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
   }
   
   if(selected_area && keys_down[kKey_Delete] && !last_keys_down[kKey_Copy]){
-    selected_area = false;
-    Veci selection_begin_copy = selection_grid_position_begin;
-    Veci selection_end_copy = selection_grid_position_end;
-    
-    if(selection_grid_position_begin.x > selection_grid_position_end.x){
-      selection_grid_position_begin.x = selection_grid_position_end.x;
-      selection_grid_position_end.x = selection_begin_copy.x;
-    }
-    if(selection_grid_position_end.y < selection_grid_position_begin.y){
-      selection_grid_position_begin.y = selection_grid_position_end.y;
-      selection_grid_position_end.y = selection_begin_copy.y;
-    }
-    Veci size_selection = {selection_grid_position_end.x - selection_grid_position_begin.x,
-                            selection_grid_position_end.y - selection_grid_position_begin.y};
-    
-    for(int y = selection_grid_position_begin.y ; 
-                y < selection_grid_position_end.y; ++y){
-      for(int x = selection_grid_position_begin.x ; 
-                x < selection_grid_position_end.x ; ++x){
-        
-        int position_in_map = x + map_size.x * y;
-        
-        delete wire_map[position_in_map];
-        wire_map[position_in_map] = nullptr;
-        delete wire_map_underground[position_in_map];
-        wire_map_underground[position_in_map] = nullptr;
-        delete logic_gate_map[position_in_map];
-        logic_gate_map[position_in_map] = nullptr;
-      }
-    }
+    DeleteSelection();
   }
   
   if(selected_area && keys_down[kKey_Copy] && !last_keys_down[kKey_Copy]){
-    selected_area = false;
-    clipboard_gates.clear();
-    clipboard_wires.clear();
-    clipboard_wires_underground.clear();
-    Veci selection_begin_copy = selection_grid_position_begin;
-    Veci selection_end_copy = selection_grid_position_end;
-    
-    if(selection_grid_position_begin.x > selection_grid_position_end.x){
-      selection_grid_position_begin.x = selection_grid_position_end.x;
-      selection_grid_position_end.x = selection_begin_copy.x;
-    }
-    if(selection_grid_position_end.y < selection_grid_position_begin.y){
-      selection_grid_position_begin.y = selection_grid_position_end.y;
-      selection_grid_position_end.y = selection_begin_copy.y;
-    }
-    Veci size_selection = {selection_grid_position_end.x - selection_grid_position_begin.x,
-                            selection_grid_position_end.y - selection_grid_position_begin.y};
-    clipboard_size = size_selection;
-    std::cout << clipboard_size.y << std::endl;
-    int vector_size = size_selection.x * size_selection.y;
-    for(int i = 0 ; i < vector_size ; ++i){
-      clipboard_gates.push_back(nullptr);
-      clipboard_wires.push_back(nullptr);
-      clipboard_wires_underground.push_back(nullptr);
-    }
-    int position_in_vector_of_real_map = 0;
-    int position_in_vector_of_clipboard_map = 0;
-    int x_temp = 0;
-    int y_temp = 0;
-    for(int y = selection_grid_position_begin.y ; 
-                y < selection_grid_position_end.y; ++y){
-      for(int x = selection_grid_position_begin.x ; 
-                x < selection_grid_position_end.x ; ++x){
-        
-          position_in_vector_of_real_map = x + map_size.x * y;
-          position_in_vector_of_clipboard_map = x_temp + size_selection.x * y_temp;
-
-            if(logic_gate_map[position_in_vector_of_real_map]){
-              
-              LogicGate* gate = logic_gate_map[position_in_vector_of_real_map];
-              switch(gate->object_type){
-                case kEditorObject_Not:
-                  clipboard_gates[position_in_vector_of_clipboard_map] = 
-                    new NotGate(Vecf{gate->body->bbox.left, gate->body->bbox.top},
-                          gate->body->direction, position_in_vector_of_clipboard_map, 
-                             map_size);
-                  break;
-                case kEditorObject_And:
-                  clipboard_gates[position_in_vector_of_clipboard_map] = 
-                    new AndGate(Vecf{gate->body->bbox.left, gate->body->bbox.top},
-                          gate->body->direction, position_in_vector_of_clipboard_map, 
-                             map_size);
-                  break;
-                case kEditorObject_Separator:
-                  clipboard_gates[position_in_vector_of_clipboard_map] = 
-                     new Separator(Vecf{gate->body->bbox.left, gate->body->bbox.top},
-                          gate->body->direction, position_in_vector_of_clipboard_map, 
-                             map_size);
-                  break;
-                default:
-                  break;
-              }
-            }
-            if(wire_map[position_in_vector_of_real_map]){
-              
-              Wire* wire = wire_map[position_in_vector_of_real_map];
-              clipboard_wires[position_in_vector_of_clipboard_map] = 
-                      new Wire(Vecf{wire->body->bbox.left, wire->body->bbox.top},
-                       position_in_vector_of_clipboard_map, wire->body->direction,
-                              kEditorObject_Wire);
-            }
-            if(wire_map_underground[position_in_vector_of_real_map]){
-              Wire* wire = wire_map_underground[position_in_vector_of_real_map];
-              clipboard_wires_underground[position_in_vector_of_clipboard_map] = 
-                      new Wire(Vecf{wire->body->bbox.left, wire->body->bbox.top},
-                        position_in_vector_of_clipboard_map,wire->body->direction,
-                              kEditorObject_Wire_Underground);
-            }
-              
-           
-          ++x_temp;
-          
-          
-        }
-      ++y_temp;
-      x_temp = 0;
-    }
+    CopySelectionToClipboard();
   }
   
   if(keys_down[kKey_Paste] && !last_keys_down[kKey_Paste]){
-    wanting_to_paste = true;
+    paste_mode = true;
     selected_area = false;
   }
   
-  if(wanting_to_paste){
-    Clean();
-    if(wanting_to_paste){
-      for(int y = 0 ; y < clipboard_size.y ; y++){
-        for(int x = 0 ; x < clipboard_size.x ; x++){
-          int vector_pos = x + y * clipboard_size.x;
-          Vecf new_position = {
-              static_cast<float>(mouse_grid_position.x * CELLS_SIZE + x * CELLS_SIZE),
-              static_cast<float>(mouse_grid_position.y * CELLS_SIZE + y * CELLS_SIZE) };
-          if(clipboard_gates[vector_pos]){
-            clipboard_gates[vector_pos]->body->bbox.MoveTo(new_position);
-          }
-          if(clipboard_wires_underground[vector_pos]){
-            clipboard_wires_underground[vector_pos]->body->bbox.MoveTo(new_position);
-          }
-          if(clipboard_wires[vector_pos]){
-            clipboard_wires[vector_pos]->body->bbox.MoveTo(new_position);
-          }
-          
-        }
-      }
-    }
-    
-    if(mouse_buttons_down[SDL_BUTTON_LEFT]){
-      for(int y = 0 ; y < clipboard_size.y ; y++){
-        for(int x = 0 ; x < clipboard_size.x ; x++){
-          int vector_pos = x + y * clipboard_size.x;
-          if(clipboard_gates[vector_pos]){
-            LogicGate* gate = clipboard_gates[vector_pos];
-          
-            int vector_pos_in_real_map = 
-            mouse_grid_position.x + mouse_grid_position.y * map_size.x +
-            x + y * map_size.x;
-            
-            delete logic_gate_map[vector_pos_in_real_map];
-            logic_gate_map[vector_pos_in_real_map] = nullptr;
-            
-            switch(gate->object_type){
-              case kEditorObject_Not:
-                logic_gate_map[vector_pos_in_real_map] = 
-                  new NotGate(Vecf{gate->body->bbox.left, gate->body->bbox.top},
-                       gate->body->direction, vector_pos_in_real_map, 
-                          map_size);;
-                break;
-              case kEditorObject_And:
-                logic_gate_map[vector_pos_in_real_map] = 
-                  new AndGate(Vecf{gate->body->bbox.left, gate->body->bbox.top},
-                        gate->body->direction, vector_pos_in_real_map, 
-                           map_size);;
-                break;
-              case kEditorObject_Separator:
-                logic_gate_map[vector_pos_in_real_map] = 
-                   new Separator(Vecf{gate->body->bbox.left, gate->body->bbox.top},
-                        gate->body->direction, vector_pos_in_real_map, 
-                           map_size);;
-                break;
-             default:
-               break;
-            }
-          }
-          if(clipboard_wires[vector_pos]){
-            Wire* wire = clipboard_wires[vector_pos];
-            int vector_pos_in_real_map = 
-            mouse_grid_position.x + mouse_grid_position.y * map_size.x +
-            x + y * map_size.x;
-            
-            delete wire_map[vector_pos_in_real_map];
-            wire_map[vector_pos_in_real_map] = nullptr;
-            wire_map[vector_pos_in_real_map] = 
-                    new Wire(Vecf{wire->body->bbox.left, wire->body->bbox.top},
-                       vector_pos_in_real_map, wire->body->direction,
-                              kEditorObject_Wire);
-            
-          }
-          if(clipboard_wires_underground[vector_pos]){
-            Wire* wire = clipboard_wires_underground[vector_pos];
-            int vector_pos_in_real_map = 
-            mouse_grid_position.x + mouse_grid_position.y * map_size.x +
-            x + y * map_size.x;
-            
-            delete wire_map_underground[vector_pos_in_real_map];
-            wire_map_underground[vector_pos_in_real_map] = nullptr;
-            wire_map_underground[vector_pos_in_real_map] = 
-                    new Wire(Vecf{wire->body->bbox.left, wire->body->bbox.top},
-                        vector_pos_in_real_map,wire->body->direction,
-                              kEditorObject_Wire_Underground);
-                    std::cout << "yeay" << std::endl;
-            
-          }
-        }
-      }
-    } 
-  }
-  
+
   /*if(save_gate_window){
     
     if(keys_down[kKey_Enter]){
@@ -510,7 +411,16 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
   }
   */
   
-  if(!wanting_to_paste){
+  if(paste_mode && !brush_mode){
+   // Clean();
+    MoveClipboardObjects();
+    if(mouse_buttons_down[SDL_BUTTON_LEFT]){
+      PasteClipboardObjects();
+    } 
+  } else if(!paste_mode && !brush_mode){
+  CreateTemporaryObject(currently_selected_object, grid_position_position);
+ 
+    
     if(!keeping_mouse_pressed &&
             mouse_buttons_down[SDL_BUTTON_LEFT] && 
             mouse_button_pressed_last_frame){
@@ -518,7 +428,6 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
       making_line_of_wires_begin_backup = making_line_of_wires_begin;
       keeping_mouse_pressed = true;
     }
-
 
     if(!selecting_area){
       if(keeping_mouse_pressed && 
@@ -530,110 +439,9 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
       if(keeping_mouse_pressed && making_line_of_wires &&
               (currently_selected_object == kEditorObject_Wire ||
               currently_selected_object == kEditorObject_Wire_Underground_Exit)){
-        for(auto &temp_wire : temporary_wire_map_blueprints){
-          delete temp_wire;
-          temp_wire = nullptr;
-        }
-
-
-
-        //always begin creation top left corner
-        //so we compare the begin and end and swap values if needed
         
-        int diff_x = mouse_grid_position.x - making_line_of_wires_begin.x;
-        int diff_y = mouse_grid_position.y - making_line_of_wires_begin.y;
-        int spawn_begin = 0;
-        int spawn_end = 0;
-        if(abs(diff_x) > abs(diff_y)){
-          if(diff_x >= 0 && diff_y >= 0){
-            temporary_rotation = kDirection_Right;
-            spawn_begin = making_line_of_wires_begin.x;
-            spawn_end = mouse_grid_position.x;
-          }
-          
-          else if(diff_x <= 0 && diff_y >= 0){
-            temporary_rotation = kDirection_Left;
-            spawn_begin = mouse_grid_position.x;
-            spawn_end = making_line_of_wires_begin.x;
-          }
-          
-          else if(diff_x <= 0 && diff_y <= 0){
-            temporary_rotation = kDirection_Left;
-            spawn_begin = mouse_grid_position.x;
-            spawn_end = making_line_of_wires_begin.x;
-          }
-            
-          else if(diff_x >= 0 && diff_y <= 0){
-            temporary_rotation = kDirection_Right;
-            spawn_begin = making_line_of_wires_begin.x;
-            spawn_end = mouse_grid_position.x;
-          }  
-        } else {
-          if(diff_x >= 0 && diff_y >= 0){
-            temporary_rotation = kDirection_Down;
-            spawn_begin = making_line_of_wires_begin.y;
-            spawn_end = mouse_grid_position.y;
-          }
-          
-          else if(diff_x <= 0 && diff_y >= 0){
-            temporary_rotation = kDirection_Down;
-            spawn_begin = making_line_of_wires_begin.y;
-            spawn_end = mouse_grid_position.y;
-          }
-          
-          else if(diff_x <= 0 && diff_y <= 0){
-            temporary_rotation = kDirection_Up;
-            spawn_begin = mouse_grid_position.y;
-            spawn_end = making_line_of_wires_begin.y;
-          }
-          
-          else if(diff_x >= 0 && diff_y <= 0){
-            temporary_rotation = kDirection_Up;
-            spawn_begin = mouse_grid_position.y;
-            spawn_end = making_line_of_wires_begin.y;
-          }
-        }
-        
-        for(int i = spawn_begin ;
-                    i <= spawn_end ;
-                    ++i){ 
-          int position_in_vector = 0;
-          Vecf real_position = {0.0f, 0.0f};
-          if(temporary_rotation == kDirection_Right || 
-                  temporary_rotation == kDirection_Left){
-            position_in_vector = i + making_line_of_wires_begin.y * map_size.x;
-            real_position = { static_cast<float>(i) * CELLS_SIZE,  
-                static_cast<float>(making_line_of_wires_begin.y) * CELLS_SIZE };
-          }
-          else {
-            position_in_vector = making_line_of_wires_begin.x + i * map_size.x;
-            real_position = { 
-                static_cast<float>(making_line_of_wires_begin.x) * CELLS_SIZE,  
-                static_cast<float>(i) * CELLS_SIZE };
-          }
-          if(!logic_gate_map[position_in_vector] || temporary_wire->type != kEditorObject_Wire){
-            if(temporary_wire->type == kEditorObject_Wire){
-              temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                    position_in_vector, temporary_rotation, temporary_wire->type);
-            } else{
-              temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                    position_in_vector, temporary_rotation, kEditorObject_Wire_Underground);
-              /*if(i == making_line_of_wires_begin.x ||
-                      i == mouse_grid_position.x){
-                temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                    position_in_vector, temporary_rotation, temporary_wire->type);
-              } else{
-                temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
-                    position_in_vector, temporary_rotation, kEditorObject_Wire_Underground);
-              }*/
-            }
-          }
-        }
+        CreateLineOfWires();
       }
-             
-      
-
-      bool pressed_rotate = false;
 
       if((keys_down[kKey_Rotate_Left] && !last_keys_down[kKey_Rotate_Left]) || 
               (mouse_buttons_down[kKey_Mouse_Rotate_Left] && 
@@ -652,134 +460,27 @@ GameData::ReceiveInput( const std::array<bool, kKey_Count>& keys_down,
           temporary_rotation = (eDirection)0;
         }
         pressed_rotate = true;
-      }
-
+      }      
+        
+      CheckMouseObjectsCollision(keys_down, mouse_buttons_down, 
+                      mouse_position_in_window,
+                      mouse_position_in_world,
+                      last_keys_down,
+                      last_mouse_buttons_down);
       
 
-      if(making_line_of_wires){
-        Clean();
-      }
-      bool temp_collision = false;
-
-      static int qsf = 0;
-      
-      for(auto &gate : logic_gate_map) {
-        if(gate) {
-          if(mouse_buttons_down[SDL_BUTTON_MIDDLE] &&
-                    !last_mouse_buttons_down[SDL_BUTTON_MIDDLE] &&
-                  gate->body->bbox.CollisionWithPoint(mouse_position_in_world)){
-            if(gate->object_type == kEditorObject_Constant_1){
-             if(gate->logical_state == kLogicalState_0){
-               gate->logical_state = kLogicalState_1;
-             } else if (gate->logical_state == kLogicalState_1){
-
-               gate->logical_state= kLogicalState_0;
-             }
-           }
-          }
-           
-          if(temporary_gate) {
-            temp_collision = gate->body->bbox.CollisionWithPoint(mouse_position_in_world);
-            if(temp_collision) {
-              
-              if(pressed_rotate) {
-                gate->Rotate(temporary_rotation, map_size);
-              }
-             
-              Clean();
-              break;
-            }
-          }
-          else if(temporary_wire) {
-            temp_collision = gate->body->bbox.CollisionWithPoint(mouse_position_in_world);
-            if(temp_collision) {
-              if(pressed_rotate) {
-                gate->Rotate(temporary_rotation, map_size);
-              }
-              Clean();
-              break;
-            }
-          }
-        }
-      }
-      for(auto &wire : wire_map) {
-        if(wire) {
-          if(temporary_gate) {
-            temp_collision = wire->body->bbox.CollisionWithPoint(mouse_position_in_world);
-            if(temp_collision) {
-              if(pressed_rotate){
-                wire->body->direction = temporary_rotation;
-              }
-              Clean();
-              break;
-            }
-          }
-          if(temporary_wire) {
-            temp_collision = wire->body->bbox.CollisionWithPoint(mouse_position_in_world);
-            if(temp_collision) {
-              if(pressed_rotate){
-                wire->body->direction = temporary_rotation;
-              }
-              Clean();
-              break;
-            }
-          }
-        }
-      }
-
-      
-
-      if(!temp_collision && !making_line_of_wires && mouse_buttons_down[SDL_BUTTON_LEFT]){
-        if(currently_selected_object == kEditorObject_And) {      
-          logic_gate_map[position_in_vector]= new AndGate(grid_position_position, temporary_rotation,
-                 position_in_vector, map_size);
-        } else if(currently_selected_object == kEditorObject_Constant_1){
-          logic_gate_map[position_in_vector]= new Constant_1(grid_position_position, temporary_rotation,
-                 position_in_vector, map_size);
-        } else if(currently_selected_object == kEditorObject_Not){
-          logic_gate_map[position_in_vector]= new NotGate(grid_position_position, temporary_rotation,
-                 position_in_vector, map_size);
-        } else if(currently_selected_object == kEditorObject_Separator){
-          logic_gate_map[position_in_vector]= new Separator(grid_position_position, temporary_rotation,
-                 position_in_vector, map_size);
-        }else if(currently_selected_object == kEditorObject_Wire) {
-          if(temporary_wire->type == kEditorObject_Wire){
-            delete wire_map[position_in_vector];
-            wire_map[position_in_vector] = nullptr;
-            wire_map[position_in_vector] = new Wire(grid_position_position,
-                      position_in_vector, temporary_rotation, temporary_wire->type);
-          }
-        }
+      if(!mouse_collide_with_object && 
+              !making_line_of_wires && 
+              mouse_buttons_down[SDL_BUTTON_LEFT]){
+        CreateSingleObject();
       }
 
 
       if(mouse_buttons_down[SDL_BUTTON_RIGHT]){ 
-        for(int i = 0 ; i < wire_map.size() ; i++){
-          if(wire_map[i]){
-            if(wire_map[i]->body->bbox.CollisionWithPoint(mouse_position_in_world)){
-              delete wire_map[i];
-              wire_map[i] = nullptr;
-            }
-          }
-        }
-        for(int i = 0 ; i < wire_map_underground.size() ; i++){
-          if(wire_map_underground[i]){
-            if(wire_map_underground[i]->body->bbox.CollisionWithPoint(mouse_position_in_world)){
-              delete wire_map_underground[i];
-              wire_map_underground[i] = nullptr;
-            }
-          }
-        }
-        for(auto &logic_gate : logic_gate_map){
-          if(logic_gate){
-            if(logic_gate->body->bbox.CollisionWithPoint(mouse_position_in_world)){
-              delete logic_gate;
-              logic_gate = nullptr;
-            }
-          }
-        }
-
+        DeleteSingleObject(mouse_position_in_world);
       }
+      
+      
     }//if !selecting_area
   }//if wanting to paste
   Vecf player_movement = player.ReceiveInput(keys_down, mouse_buttons_down);
@@ -865,11 +566,13 @@ GameData::Update() {
             i - map_size.y //up
           };
           eDirection direction = wire->body->direction;
-            if(wire_map_underground[direction_grid_position[direction]]){
+            if(wire_map_underground[direction_grid_position[direction]] &&
+                    wire_map_underground[direction_grid_position[direction]]->output_direction == wire->output_direction){
                 temporary_energy_map_underground[direction_grid_position[direction]][direction] = 
                         new Energy(wire->logical_state, wire->energy_value);
             } else {
-              if(wire_map[direction_grid_position[direction]]){
+              if(wire_map[direction_grid_position[direction]] &&
+                      wire_map[direction_grid_position[direction]]->output_direction == wire->output_direction){
                 temporary_energy_map[direction_grid_position[direction]][direction] =
                         new Energy(wire->logical_state, wire->energy_value);
               }
@@ -936,7 +639,6 @@ GameData::Update() {
           if(energy_map[direction_grid_position[direction]][direction]){
             if(energy_map[direction_grid_position[direction]][direction]->value < wire_map[i]->energy_value){
               energy_map[direction_grid_position[direction]][direction]->value = wire_map[i]->energy_value;
-              std::cout << wire_map[i]->energy_value << std::endl;
             }
           }
         }
@@ -990,8 +692,550 @@ GameData::ResetWiresVisitedState() {
 
 void
 GameData::Clean(){
+
     delete temporary_gate;
     temporary_gate = nullptr;
     delete temporary_wire;
     temporary_wire = nullptr;
+}
+
+void 
+GameData::DeleteSelection() {
+    selected_area = false;
+    Veci selection_begin_copy = selection_grid_position_begin;
+    Veci selection_end_copy = selection_grid_position_end;
+    
+    if(selection_grid_position_begin.x > selection_grid_position_end.x){
+      selection_grid_position_begin.x = selection_grid_position_end.x;
+      selection_grid_position_end.x = selection_begin_copy.x;
+    }
+    if(selection_grid_position_end.y < selection_grid_position_begin.y){
+      selection_grid_position_begin.y = selection_grid_position_end.y;
+      selection_grid_position_end.y = selection_begin_copy.y;
+    }
+    Veci size_selection = {selection_grid_position_end.x - selection_grid_position_begin.x,
+                            selection_grid_position_end.y - selection_grid_position_begin.y};
+    
+    for(int y = selection_grid_position_begin.y ; 
+                y < selection_grid_position_end.y; ++y){
+      for(int x = selection_grid_position_begin.x ; 
+                x < selection_grid_position_end.x ; ++x){
+        
+        int position_in_map = x + map_size.x * y;
+        
+        delete wire_map[position_in_map];
+        wire_map[position_in_map] = nullptr;
+        delete wire_map_underground[position_in_map];
+        wire_map_underground[position_in_map] = nullptr;
+        delete logic_gate_map[position_in_map];
+        logic_gate_map[position_in_map] = nullptr;
+      }
+    }
+}
+
+void 
+GameData::CopySelectionToClipboard() {
+  selected_area = false;
+  clipboard_gates.clear();
+  clipboard_wires.clear();
+  clipboard_wires_underground.clear();
+  Veci selection_begin_copy = selection_grid_position_begin;
+  Veci selection_end_copy = selection_grid_position_end;
+
+  if(selection_grid_position_begin.x > selection_grid_position_end.x){
+    selection_grid_position_begin.x = selection_grid_position_end.x;
+    selection_grid_position_end.x = selection_begin_copy.x;
+  }
+  if(selection_grid_position_end.y < selection_grid_position_begin.y){
+    selection_grid_position_begin.y = selection_grid_position_end.y;
+    selection_grid_position_end.y = selection_begin_copy.y;
+  }
+  Veci size_selection = {selection_grid_position_end.x - selection_grid_position_begin.x,
+                          selection_grid_position_end.y - selection_grid_position_begin.y};
+  clipboard_size = size_selection;
+  int vector_size = size_selection.x * size_selection.y;
+  for(int i = 0 ; i < vector_size ; ++i){
+    clipboard_gates.push_back(nullptr);
+    clipboard_wires.push_back(nullptr);
+    clipboard_color_map.push_back(kColor_None);
+    clipboard_wires_underground.push_back(nullptr);
+  }
+  int position_in_vector_of_real_map = 0;
+  int position_in_vector_of_clipboard_map = 0;
+  int x_temp = 0;
+  int y_temp = 0;
+  for(int y = selection_grid_position_begin.y ; 
+              y < selection_grid_position_end.y; ++y){
+    for(int x = selection_grid_position_begin.x ; 
+              x < selection_grid_position_end.x ; ++x){
+
+        position_in_vector_of_real_map = x + map_size.x * y;
+        position_in_vector_of_clipboard_map = x_temp + size_selection.x * y_temp;
+          
+        clipboard_color_map[position_in_vector_of_clipboard_map] = 
+                color_map[position_in_vector_of_real_map];
+          if(logic_gate_map[position_in_vector_of_real_map]){
+
+            LogicGate* gate = logic_gate_map[position_in_vector_of_real_map];
+            switch(gate->object_type){
+              case kEditorObject_Not:
+                clipboard_gates[position_in_vector_of_clipboard_map] = 
+                  new NotGate(Vecf{gate->body->bbox.left, gate->body->bbox.top},
+                        gate->body->direction, position_in_vector_of_clipboard_map, 
+                           map_size);
+                break;
+              case kEditorObject_And:
+                clipboard_gates[position_in_vector_of_clipboard_map] = 
+                  new AndGate(Vecf{gate->body->bbox.left, gate->body->bbox.top},
+                        gate->body->direction, position_in_vector_of_clipboard_map, 
+                           map_size);
+                break;
+              case kEditorObject_Separator:
+                clipboard_gates[position_in_vector_of_clipboard_map] = 
+                   new Separator(Vecf{gate->body->bbox.left, gate->body->bbox.top},
+                        gate->body->direction, position_in_vector_of_clipboard_map, 
+                           map_size);
+                break;
+              case kEditorObject_ThreeState:
+                clipboard_gates[position_in_vector_of_clipboard_map] = 
+                   new ThreeState(Vecf{gate->body->bbox.left, gate->body->bbox.top},
+                        gate->body->direction, position_in_vector_of_clipboard_map, 
+                           map_size);
+                break;
+              default:
+                break;
+            }
+          }
+          if(wire_map[position_in_vector_of_real_map]){
+
+            Wire* wire = wire_map[position_in_vector_of_real_map];
+            clipboard_wires[position_in_vector_of_clipboard_map] = 
+                    new Wire(Vecf{wire->body->bbox.left, wire->body->bbox.top},
+                     position_in_vector_of_clipboard_map, wire->body->direction,
+                            kEditorObject_Wire);
+          }
+          if(wire_map_underground[position_in_vector_of_real_map]){
+            Wire* wire = wire_map_underground[position_in_vector_of_real_map];
+            clipboard_wires_underground[position_in_vector_of_clipboard_map] = 
+                    new Wire(Vecf{wire->body->bbox.left, wire->body->bbox.top},
+                      position_in_vector_of_clipboard_map,wire->body->direction,
+                            kEditorObject_Wire_Underground);
+          }
+
+
+        ++x_temp;
+
+
+      }
+    ++y_temp;
+    x_temp = 0;
+  }
+}
+
+void GameData::PasteClipboardObjects() {
+  for(int y = 0 ; y < clipboard_size.y ; y++){
+    for(int x = 0 ; x < clipboard_size.x ; x++){
+      
+
+      int vector_pos = x + y * clipboard_size.x;
+      
+      int vector_pos_in_real_map = 
+        mouse_grid_position.x + mouse_grid_position.y * map_size.x +
+        x + y * map_size.x;
+      
+      if(clipboard_color_map[vector_pos] != kColor_None){
+        color_map[vector_pos_in_real_map] = clipboard_color_map[vector_pos];
+      }
+      if(clipboard_gates[vector_pos]){
+        LogicGate* gate = clipboard_gates[vector_pos];
+        
+        delete logic_gate_map[vector_pos_in_real_map];
+        logic_gate_map[vector_pos_in_real_map] = nullptr;
+
+        switch(gate->object_type){
+          case kEditorObject_Not:
+            logic_gate_map[vector_pos_in_real_map] = 
+              new NotGate(Vecf{gate->body->bbox.left, gate->body->bbox.top},
+                   gate->body->direction, vector_pos_in_real_map, 
+                      map_size);;
+            break;
+          case kEditorObject_And:
+            logic_gate_map[vector_pos_in_real_map] = 
+              new AndGate(Vecf{gate->body->bbox.left, gate->body->bbox.top},
+                    gate->body->direction, vector_pos_in_real_map, 
+                       map_size);;
+            break;
+            case kEditorObject_ThreeState:
+            logic_gate_map[vector_pos_in_real_map] = 
+              new ThreeState(Vecf{gate->body->bbox.left, gate->body->bbox.top},
+                    gate->body->direction, vector_pos_in_real_map, 
+                       map_size);;
+            break;
+          case kEditorObject_Separator:
+            logic_gate_map[vector_pos_in_real_map] = 
+               new Separator(Vecf{gate->body->bbox.left, gate->body->bbox.top},
+                    gate->body->direction, vector_pos_in_real_map, 
+                       map_size);;
+            break;
+         default:
+           break;
+        }
+      }
+      if(clipboard_wires[vector_pos]){
+        Wire* wire = clipboard_wires[vector_pos];
+        int vector_pos_in_real_map = 
+        mouse_grid_position.x + mouse_grid_position.y * map_size.x +
+        x + y * map_size.x;
+
+        delete wire_map[vector_pos_in_real_map];
+        wire_map[vector_pos_in_real_map] = nullptr;
+        wire_map[vector_pos_in_real_map] = 
+                new Wire(Vecf{wire->body->bbox.left, wire->body->bbox.top},
+                   vector_pos_in_real_map, wire->body->direction,
+                          kEditorObject_Wire);
+
+      }
+      if(clipboard_wires_underground[vector_pos]){
+        Wire* wire = clipboard_wires_underground[vector_pos];
+        int vector_pos_in_real_map = 
+        mouse_grid_position.x + mouse_grid_position.y * map_size.x +
+        x + y * map_size.x;
+
+        delete wire_map_underground[vector_pos_in_real_map];
+        wire_map_underground[vector_pos_in_real_map] = nullptr;
+        wire_map_underground[vector_pos_in_real_map] = 
+                new Wire(Vecf{wire->body->bbox.left, wire->body->bbox.top},
+                    vector_pos_in_real_map,wire->body->direction,
+                          kEditorObject_Wire_Underground);
+      }
+    }
+  }
+}
+
+void 
+GameData::MoveClipboardObjects(){
+  for(int y = 0 ; y < clipboard_size.y ; y++){
+    for(int x = 0 ; x < clipboard_size.x ; x++){
+      int vector_pos = x + y * clipboard_size.x;
+      Vecf new_position = {
+          static_cast<float>(mouse_grid_position.x * CELLS_SIZE + x * CELLS_SIZE),
+          static_cast<float>(mouse_grid_position.y * CELLS_SIZE + y * CELLS_SIZE) };
+      if(clipboard_gates[vector_pos]){
+        clipboard_gates[vector_pos]->body->bbox.MoveTo(new_position);
+      }
+      if(clipboard_wires_underground[vector_pos]){
+        clipboard_wires_underground[vector_pos]->body->bbox.MoveTo(new_position);
+      }
+      if(clipboard_wires[vector_pos]){
+        clipboard_wires[vector_pos]->body->bbox.MoveTo(new_position);
+      }
+
+    }
+  }  
+}
+
+void GameData::CreateLineOfWires() {
+
+  for(auto &temp_wire : temporary_wire_map_blueprints){
+    delete temp_wire;
+    temp_wire = nullptr;
+  }
+  //always begin creation top left corner
+  //so we compare the begin and end and swap values if needed
+
+  int diff_x = mouse_grid_position.x - making_line_of_wires_begin.x;
+  int diff_y = mouse_grid_position.y - making_line_of_wires_begin.y;
+  int spawn_begin = 0;
+  int spawn_end = 0;
+  if(abs(diff_x) > abs(diff_y)){
+    if(diff_x >= 0 && diff_y >= 0){
+      temporary_rotation = kDirection_Right;
+      spawn_begin = making_line_of_wires_begin.x;
+      spawn_end = mouse_grid_position.x;
+    }
+
+    else if(diff_x <= 0 && diff_y >= 0){
+      temporary_rotation = kDirection_Left;
+      spawn_begin = mouse_grid_position.x;
+      spawn_end = making_line_of_wires_begin.x;
+    }
+
+    else if(diff_x <= 0 && diff_y <= 0){
+      temporary_rotation = kDirection_Left;
+      spawn_begin = mouse_grid_position.x;
+      spawn_end = making_line_of_wires_begin.x;
+    }
+
+    else if(diff_x >= 0 && diff_y <= 0){
+      temporary_rotation = kDirection_Right;
+      spawn_begin = making_line_of_wires_begin.x;
+      spawn_end = mouse_grid_position.x;
+    }  
+  } else {
+    if(diff_x >= 0 && diff_y >= 0){
+      temporary_rotation = kDirection_Down;
+      spawn_begin = making_line_of_wires_begin.y;
+      spawn_end = mouse_grid_position.y;
+    }
+
+    else if(diff_x <= 0 && diff_y >= 0){
+      temporary_rotation = kDirection_Down;
+      spawn_begin = making_line_of_wires_begin.y;
+      spawn_end = mouse_grid_position.y;
+    }
+
+    else if(diff_x <= 0 && diff_y <= 0){
+      temporary_rotation = kDirection_Up;
+      spawn_begin = mouse_grid_position.y;
+      spawn_end = making_line_of_wires_begin.y;
+    }
+
+    else if(diff_x >= 0 && diff_y <= 0){
+      temporary_rotation = kDirection_Up;
+      spawn_begin = mouse_grid_position.y;
+      spawn_end = making_line_of_wires_begin.y;
+    }
+  }
+
+  for(int i = spawn_begin ;
+              i <= spawn_end ;
+              ++i){ 
+    int position_in_vector = 0;
+    Vecf real_position = {0.0f, 0.0f};
+    if(temporary_rotation == kDirection_Right || 
+            temporary_rotation == kDirection_Left){
+      position_in_vector = i + making_line_of_wires_begin.y * map_size.x;
+      real_position = { static_cast<float>(i) * CELLS_SIZE,  
+          static_cast<float>(making_line_of_wires_begin.y) * CELLS_SIZE };
+    }
+    else {
+      position_in_vector = making_line_of_wires_begin.x + i * map_size.x;
+      real_position = { 
+          static_cast<float>(making_line_of_wires_begin.x) * CELLS_SIZE,  
+          static_cast<float>(i) * CELLS_SIZE };
+    }
+    if(!logic_gate_map[position_in_vector] || temporary_wire->type != kEditorObject_Wire){
+      if(temporary_wire->type == kEditorObject_Wire){
+        temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+              position_in_vector, temporary_rotation, temporary_wire->type);
+      } else{
+        temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+              position_in_vector, temporary_rotation, kEditorObject_Wire_Underground);
+        /*if(i == making_line_of_wires_begin.x ||
+                i == mouse_grid_position.x){
+          temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+              position_in_vector, temporary_rotation, temporary_wire->type);
+        } else{
+          temporary_wire_map_blueprints[position_in_vector] = new Wire(real_position,
+              position_in_vector, temporary_rotation, kEditorObject_Wire_Underground);
+        }*/
+      }
+    }
+  }
+  Clean();
+}
+
+void GameData::CheckMouseObjectsCollision(const std::array<bool, kKey_Count>& keys_down,
+        const std::array<bool, 255 > & mouse_buttons_down, 
+                        const Veci& mouse_position_in_window,
+                        const Vecf& mouse_position_in_world,
+                        const std::array<bool, kKey_Count>& last_keys_down,
+        const std::array<bool, 255>& last_mouse_buttons_down) {
+  for(auto &gate : logic_gate_map) {
+    if(gate) {
+      if(mouse_buttons_down[SDL_BUTTON_MIDDLE] &&
+                !last_mouse_buttons_down[SDL_BUTTON_MIDDLE] &&
+              gate->body->bbox.CollisionWithPoint(mouse_position_in_world)){
+        if(gate->object_type == kEditorObject_Constant_1){
+         if(gate->logical_state == kLogicalState_0){
+           gate->logical_state = kLogicalState_1;
+         } else if (gate->logical_state == kLogicalState_1){
+
+           gate->logical_state= kLogicalState_0;
+         }
+       }
+      }
+      
+      if(gate->body->bbox.CollisionWithPoint(mouse_position_in_world)) {
+        mouse_collide_with_object = true;
+        if(pressed_rotate) {
+            gate->Rotate(temporary_rotation, map_size);
+        }
+        Clean();
+      }
+    }
+
+      /*if(temporary_gate) {
+        if(gate->body->bbox.CollisionWithPoint(mouse_position_in_world)) {
+          mouse_collide_with_object = true;
+          if(pressed_rotate) {
+            gate->Rotate(temporary_rotation, map_size);
+          }
+
+          Clean();
+          break;
+        }
+      }
+      else if(temporary_wire) {
+          if(gate->body->bbox.CollisionWithPoint(mouse_position_in_world)) {
+          mouse_collide_with_object = true;
+          if(pressed_rotate) {
+            gate->Rotate(temporary_rotation, map_size);
+          }
+          Clean();
+          break;
+        }
+      }
+    }*/
+  }
+  for(auto &wire : wire_map) {
+    if(wire) {
+      if(wire->body->bbox.CollisionWithPoint(mouse_position_in_world)) {
+        mouse_collide_with_object = true;
+        Clean();
+        if(pressed_rotate) {
+            wire->body->direction = temporary_rotation;
+        }
+      }
+      
+      
+      
+    }
+      /*if(temporary_gate) {
+        temp_collision = wire->body->bbox.CollisionWithPoint(mouse_position_in_world);
+        if(temp_collision) {
+          if(pressed_rotate){
+            wire->body->direction = temporary_rotation;
+          }
+          Clean();
+          break;
+        }
+      }
+      if(temporary_wire) {
+        temp_collision = wire->body->bbox.CollisionWithPoint(mouse_position_in_world);
+        if(temp_collision) {
+          if(pressed_rotate){
+            wire->body->direction = temporary_rotation;
+          }
+          Clean();
+          break;
+        }
+      }
+    }*/
+  }
+}
+
+void 
+GameData::CreateSingleObject() {
+
+
+  if(currently_selected_object == kEditorObject_And) {      
+  logic_gate_map[mouse_vector_position]= new AndGate(grid_position_position, temporary_rotation,
+           mouse_vector_position, map_size);
+  } else if(currently_selected_object == kEditorObject_Constant_1){
+    logic_gate_map[mouse_vector_position]= new Constant_1(grid_position_position, temporary_rotation,
+           mouse_vector_position, map_size);
+  } else if(currently_selected_object == kEditorObject_Not){
+    logic_gate_map[mouse_vector_position]= new NotGate(grid_position_position, temporary_rotation,
+           mouse_vector_position, map_size);
+  } else if(currently_selected_object == kEditorObject_Separator){
+    logic_gate_map[mouse_vector_position]= new Separator(grid_position_position, temporary_rotation,
+           mouse_vector_position, map_size);
+  } else if(currently_selected_object == kEditorObject_ThreeState){
+    logic_gate_map[mouse_vector_position]= new ThreeState(grid_position_position, temporary_rotation,
+           mouse_vector_position, map_size);
+  }
+  else if(currently_selected_object == kEditorObject_Wire) {
+    if(temporary_wire && temporary_wire->type == kEditorObject_Wire){
+      delete wire_map[mouse_vector_position];
+      wire_map[mouse_vector_position] = nullptr;
+      wire_map[mouse_vector_position] = new Wire(grid_position_position,
+                mouse_vector_position, temporary_rotation, temporary_wire->type);
+    }
+  }
+}
+
+void 
+GameData::DeleteSingleObject(const Vecf& mouse_position_in_world) {
+  for(int i = 0 ; i < wire_map.size() ; i++){
+    if(wire_map[i]){
+      if(wire_map[i]->body->bbox.CollisionWithPoint(mouse_position_in_world)){
+        delete wire_map[i];
+        wire_map[i] = nullptr;
+      }
+    }
+  }
+  for(int i = 0 ; i < wire_map_underground.size() ; i++){
+    if(wire_map_underground[i]){
+      if(wire_map_underground[i]->body->bbox.CollisionWithPoint(mouse_position_in_world)){
+        delete wire_map_underground[i];
+        wire_map_underground[i] = nullptr;
+      }
+    }
+  }
+  for(auto &logic_gate : logic_gate_map){
+    if(logic_gate){
+      if(logic_gate->body->bbox.CollisionWithPoint(mouse_position_in_world)){
+        delete logic_gate;
+        logic_gate = nullptr;
+      }
+    }
+  }
+}
+
+void 
+GameData::CheckItemSelectionKeys(const std::array<bool, kKey_Count>& keys_down) {
+        
+  bool pressed_object_selection_key = false;
+
+  if(keys_down[kKey_Constant_1]){
+    currently_selected_object = kEditorObject_Constant_1;
+    pressed_object_selection_key = true;
+  }
+
+  if(keys_down[kKey_And]){
+    currently_selected_object = kEditorObject_And;
+    pressed_object_selection_key = true;
+  }
+
+  if(keys_down[kKey_Not]){
+    currently_selected_object = kEditorObject_Not;
+    pressed_object_selection_key = true;
+  }
+  
+  if(keys_down[kKey_ToolBar1]){
+    currently_selected_object = kEditorObject_Wire;
+    pressed_object_selection_key = true;
+  }
+      
+  if(keys_down[kKey_ToolBar2]){
+    currently_selected_object = kEditorObject_Wire_Underground_Exit;
+    pressed_object_selection_key = true;
+  }
+
+  if(keys_down[kKey_ToolBar3]){
+    currently_selected_object = kEditorObject_Separator;
+    pressed_object_selection_key = true;
+  }
+  
+  if(keys_down[kKey_ToolBar7]){
+    currently_selected_object = kEditorObject_ThreeState;
+    pressed_object_selection_key = true;
+  }
+      
+  if(pressed_object_selection_key){
+    paste_mode = false;
+  }
+}
+
+void 
+GameData::UpdateMousePosition(const Vecf& mouse_position_in_world) {
+
+  mouse_grid_position = {static_cast<int>(mouse_position_in_world.x)/CELLS_SIZE,
+                         static_cast<int>(mouse_position_in_world.y)/CELLS_SIZE};
+  
+  grid_position_position = { static_cast<float>(mouse_grid_position.x) * CELLS_SIZE,  
+                             static_cast<float>(mouse_grid_position.y) * CELLS_SIZE };
+  
+  mouse_vector_position = mouse_grid_position.x + mouse_grid_position.y * map_size.y;
 }

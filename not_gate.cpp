@@ -10,6 +10,7 @@ LogicGate(position, direction, position_in_array, map_size, kTexture_Not,
 
 void NotGate::Rotate(const eDirection direction, const Veci& map_size) {
   body->direction = direction;
+  output_direction[0] = direction;
   switch(direction){
     case kDirection_Down:
       output_position_in_map_grid[0] = position_in_map_grid + map_size.x;

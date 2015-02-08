@@ -24,6 +24,7 @@ Constant_1::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
 }
 
 void Constant_1::Rotate(const eDirection direction, const Veci& map_size) {
+  body->direction = direction;
   switch(direction){
     case kDirection_Down:
       output_position_in_map_grid[0] = position_in_map_grid + map_size.x;

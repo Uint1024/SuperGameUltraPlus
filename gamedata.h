@@ -29,11 +29,34 @@ struct GameData{
           const Vecf& mouse_position_in_world,
           const std::array<bool, kKey_Count>& last_keys_down,
           const std::array<bool, 255>& last_mouse_buttons_down);
+  void CreateSingleObject();
+  void DeleteSingleObject(const Vecf& mouse_position_in_world);
+  void CheckItemSelectionKeys(const std::array<bool, kKey_Count>& keys_down);
+  void UpdateMousePosition(const Vecf& mouse_position_in_world);
+  void DeleteSelection();
+  void CopySelectionToClipboard();
+  void MoveClipboardObjects();
+  void PasteClipboardObjects();
+  void CreateLineOfWires();
+  void CheckMouseObjectsCollision(const std::array<bool, kKey_Count>& keys_down,
+                        const std::array<bool, 255 >& mouse_buttons_down, 
+                        const Veci& mouse_position_in_window,
+                        const Vecf& mouse_position_in_world,
+                        const std::array<bool, kKey_Count>& last_keys_down,
+        const std::array<bool, 255>& last_mouse_buttons_down);
   void Update();
   void Clean();
+  void BrushMode( const std::array<bool, kKey_Count>& keys_down, 
+                      const std::array<bool, 255 > & mouse_buttons_down, 
+                        const Veci& mouse_position_in_window,
+                        const Vecf& mouse_position_in_world,
+                        const std::array<bool, kKey_Count>& last_keys_down,
+        const std::array<bool, 255>& last_mouse_buttons_down);
   void ResetWiresVisitedState();
   void CreateTemporaryObject(const eEditorObject object_type, const Vecf& position);
   void TransmitEnergyValue();
+  void RenderColorSquare(Engine& engine, const eColor ecolor, 
+        const int x, const int y);
   Player player;
   Veci map_size;
   //grid of energy, each cell can have 4 "energy" objects, 1 from each direction
@@ -44,6 +67,8 @@ struct GameData{
   std::vector<Wire*> wire_map;
   std::vector<Wire*> wire_map_underground;
   std::vector<Wire*> temporary_wire_map_blueprints;
+  std::vector<eColor> color_map;
+  std::vector<eColor> clipboard_color_map;
   
   std::vector<LogicGate*> clipboard_gates;
   std::vector<Wire*> clipboard_wires;
@@ -52,6 +77,7 @@ struct GameData{
   
   eEditorObject currently_selected_object;
   Veci mouse_grid_position;
+  int mouse_vector_position;
   Vecf grid_position_position;
   
   LogicGate* temporary_gate;
@@ -71,7 +97,13 @@ struct GameData{
   int update_delay;
   int update_timer;
   bool selected_area;
-  bool wanting_to_paste;
+  
+  bool paste_mode;
+  bool brush_mode;
+  eColor brush_color;
+  
+  bool mouse_collide_with_object;
+  bool pressed_rotate;
 };
 
 #endif	/* GAMEDATA_H */

@@ -78,6 +78,19 @@ Engine::Initialize(std::string window_name, const Veci window_size) {
   sprites_data[kTexture_Wire_Error] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
   
+   src_rect = {{160,32,32,32}};
+  sprites_data[kTexture_ThreeState_Empty] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
+  
+   src_rect = {{160,64,32,32}};
+  sprites_data[kTexture_ThreeState_0] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
+  
+   src_rect = {{160,96,32,32}};
+  sprites_data[kTexture_ThreeState_1] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0); 
+  
+  
   src_rect = {{128,0,32,32}};
   sprites_data[kTexture_And] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0);  
