@@ -1,6 +1,10 @@
 #include <iostream>
 #include "label.h"
 
+Label::Label() :
+bbox(Vecf{0,0}, Veci{0,0}), text(""), texture(nullptr){
+  
+}
 Label::Label(const Vecf& position, 
         const std::string text) :
 bbox(position, Veci{0,0}), text(text), texture(nullptr){

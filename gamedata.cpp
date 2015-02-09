@@ -394,10 +394,12 @@ GameData::BrushMode( const std::array<bool, kKey_Count>& keys_down,
 void 
 GameData::Save(std::string file_name) {
   std::cout <<"saving" << std::endl;
-  std::ofstream out(file_name, std::ios::binary | std::ios::out);
+  std::ofstream out(file_name, std::ios::trunc | std::ios::binary | std::ios::out);
 
   if(out.is_open())
   {
+    out.seekp(std::ios_base::beg);
+    std::cout << wire_map.size() << std::endl;
     out.write(reinterpret_cast<char *>(&map_size.x), sizeof(map_size.x));
     out.write(reinterpret_cast<char *>(&map_size.y), sizeof(map_size.y));
 
@@ -439,6 +441,7 @@ GameData::Save(std::string file_name) {
       }
     }
 
+    
     for(int i = 0 ; i < logic_gate_map.size() ; i++){
       if(!logic_gate_map[i]) {
         bool is_object = false;
@@ -446,6 +449,7 @@ GameData::Save(std::string file_name) {
       }
       else
       {
+        std::cout << "heh" << std::endl;
         LogicGate* object = logic_gate_map[i];
         bool is_object = true;
         Vecf position = object->body->bbox.GetCoordinates();
@@ -461,26 +465,31 @@ GameData::Save(std::string file_name) {
       }
     }
     
+   
     /*Writing colors*/
     for(int i = 0 ; i < color_map.size() ; i++){
-      out.write(reinterpret_cast<char *>(&color_map[i]), sizeof(color_map[i]));
+      eColor color = color_map[i];
+      out.write(reinterpret_cast<char *>(&color), sizeof(color));
+       
     }
-    
+     
+     
+     std::cout << "begin writing color" << out.tellp() << std::endl;
     /*Writing labels*/
     int size = labels.size();
     out.write(reinterpret_cast<char *>(&size), sizeof(size));
     for(int i = 0 ; i < size ; i++){
       Vecf position = labels[i].bbox.GetCoordinates();
       std::string text = labels[i].text;
-      const char* c_string = text.c_str();
       int string_size = text.size();
       out.write(reinterpret_cast<char *>(&position.x), sizeof(position.x));
       out.write(reinterpret_cast<char *>(&position.y), sizeof(position.y));
       out.write(reinterpret_cast<char *>(&string_size), sizeof(string_size));
       out.write(text.c_str(), text.size());
+      std::cout << text.c_str() << std::endl;
     }
     
-    
+    std::cout << "end writing color" << out.tellp() << std::endl;
   } 
 }
 
@@ -500,9 +509,10 @@ GameData::Load(std::string file_name) {
       i = nullptr;
     }
     int total_map_size = map_size.x * map_size.y;
+    wire_map.resize(total_map_size);
     for(int i = 0 ; i < total_map_size ; i++)
     {
-      wire_map.emplace_back(nullptr);
+      wire_map[i] = nullptr;
     }
 
     for(int i = 0 ; i < total_map_size ; i++)
@@ -526,9 +536,10 @@ GameData::Load(std::string file_name) {
       delete i;
       i = nullptr;
     }
+    wire_map_underground.resize(total_map_size);
     for(int i = 0 ; i < total_map_size ; i++)
     {
-      wire_map_underground.emplace_back(nullptr);
+      wire_map_underground[i] = nullptr;
     }
 
     for(int i = 0 ; i < total_map_size ; i++)
@@ -553,17 +564,18 @@ GameData::Load(std::string file_name) {
       delete i;
       i = nullptr;
     }
+    logic_gate_map.resize(total_map_size);
     for(int i = 0 ; i < total_map_size ; i++)
     {
-      logic_gate_map.emplace_back(nullptr);
+      logic_gate_map[i] = nullptr;
     }
-
     for(int i = 0 ; i < total_map_size ; i++){
       bool is_object = false;
-      in.read((char*)&is_object, sizeof(is_object));
+      in.read(reinterpret_cast<char *>(&is_object), sizeof(is_object));
 
       if(is_object)
       {
+        
         Vecf position = {0.0f, 0.0f};
         eDirection direction = kDirection_Count;
         eEditorObject type = kEditorObject_None;
@@ -600,28 +612,39 @@ GameData::Load(std::string file_name) {
       }
     }
     
+    color_map.resize(total_map_size);
+
     /*Reading colors*/
     for(int i = 0 ; i < total_map_size ; i++){
-      in.read(reinterpret_cast<char *>(&color_map[i]), sizeof(color_map[i]));
+      eColor color = kColor_None;
+      
+      in.read(reinterpret_cast<char *>(&color), sizeof(color));
+      color_map[i] = color;
     }
+
     
-    /*Reading labels*/
+    //Reading labels
     labels.clear();
     int size = 0;
+    
     in.read(reinterpret_cast<char *>(&size), sizeof(size));
+    labels.resize(size);
     for(int i = 0 ; i < size ; i++){
       Vecf position = Vecf{0,0};
       int string_size = 0;
       in.read(reinterpret_cast<char *>(&position.x), sizeof(position.x));
       in.read(reinterpret_cast<char *>(&position.y), sizeof(position.y));
       in.read(reinterpret_cast<char *>(&string_size), sizeof(string_size));
+      
       char c_string[string_size];
+      
       in.read(c_string, sizeof(c_string));
       std::string text(c_string);
-      
-      labels.push_back(Label(position, text));    
+      std::string real_string(text, 0, string_size);//hack
+      labels[i] = Label(position, real_string);    
     }
   }
+  
 }
 
 
@@ -634,7 +657,7 @@ GameData::ReceiveInput( std::string text_input,
                         const std::array<bool, kKey_Count>& last_keys_down,
         const std::array<bool, 255>& last_mouse_buttons_down) {
   pressed_rotate = false;
-
+ // std::cout << color_map.size() << " " << color_map.capacity() << std::endl;
   if(keys_down[kKey_QuickSave] && !last_keys_down[kKey_QuickSave]){
     Save("quick_save.sav");
   } 

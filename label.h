@@ -13,6 +13,7 @@
 #include "SDL.h"
 #include <string>
 struct Label {
+  Label();
   Label(const Vecf& position, const std::string text);
   ~Label();
   Bbox bbox;
