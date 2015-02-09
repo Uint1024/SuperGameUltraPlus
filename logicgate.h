@@ -30,8 +30,8 @@ struct LogicGate {
       std::vector<std::array<Energy*, 4>>& energy_map, 
       std::vector<std::array<Energy*, 4>>& temp_energy_map, 
       const Veci& map_size,
-      std::vector<Wire*> wire_map,
-      std::vector<Wire*> wire_map_underground);
+      std::vector<Wire*>& wire_map,
+      std::vector<Wire*>& wire_map_underground);
   virtual void Rotate(const eDirection direction, const Veci& map_size) = 0;
   LogicGate& operator=(const LogicGate& rhs);
   SolidBody* body;

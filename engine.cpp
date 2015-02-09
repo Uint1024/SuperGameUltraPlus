@@ -177,7 +177,7 @@ Engine::Initialize(std::string window_name, const Veci window_size) {
 
 void 
 Engine::Render(GameData& game_data) {
-  SDL_SetRenderDrawColor(renderer, 210, 210, 210, 255);
+  SDL_SetRenderDrawColor(renderer, 225, 225, 225, 255);
   SDL_RenderClear(renderer);
   
   

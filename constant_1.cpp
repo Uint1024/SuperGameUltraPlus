@@ -23,7 +23,7 @@ Constant_1::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
       break;
   }
    
-   std::cout << logical_state << std::endl;
+
 }
 
 void Constant_1::Rotate(const eDirection direction, const Veci& map_size) {

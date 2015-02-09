@@ -40,6 +40,7 @@ rotate_key_press_timer(0){
   keymap[SDL_SCANCODE_B] = kKey_Brush;
   keymap[SDL_SCANCODE_F] = kKey_Fill;
   keymap[SDL_SCANCODE_PAGEDOWN] = kKey_Zoom_Out;
+  keymap[SDL_SCANCODE_PAGEUP] = kKey_Zoom_In;
   keymap[SDL_SCANCODE_BACKSPACE] = kKey_Backspace;
   keymap[SDL_SCANCODE_F5] = kKey_QuickSave;
   keymap[SDL_SCANCODE_F9] = kKey_QuickLoad;

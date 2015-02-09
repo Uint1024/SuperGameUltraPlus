@@ -53,25 +53,26 @@ int main(int argc, char** argv) {
   
   bool running = true;
   
-  Uint32 start_time = SDL_GetTicks();
+  Uint32 current_time = SDL_GetTicks();
   Uint32 ms_since_last_frame;
-  
+  Uint32 t = 0;
   //limit to 120 fps (= 1 frame every 15 ms)
   while (running) {
-
-    Uint32 diff = SDL_GetTicks() - last;
-    ms_since_last_frame += diff;
-    if (ms_since_last_frame >= 5) { 
-      g_delta_t = ms_since_last_frame / 1000.0f;
-      running = input.PollEvents(game_data, engine);
-      game_data.Update();
-      engine.Render(game_data);
-      fps = 1000 / g_delta_t;
-      ms_since_last_frame = 0;
+    Uint32 new_time = SDL_GetTicks();
+    Uint32 frame_time = new_time - current_time;
+    current_time = new_time;
+    //Uint32 diff = SDL_GetTicks() - last;
+    //ms_since_last_frame += diff;
      
-    } 
+    //std::cout << ms_since_last_frame << std::endl;
+    g_delta_t = frame_time / 1000.0f;
+    running = input.PollEvents(game_data, engine);
+    game_data.Update();
+    engine.Render(game_data);
+
+    ms_since_last_frame = 0;
+     
     
-    last = SDL_GetTicks();
     
   }
   return 0;

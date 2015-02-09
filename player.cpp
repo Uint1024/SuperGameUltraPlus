@@ -12,7 +12,7 @@ body(new DynamicBody(pos, Veci{64, 64}, kTexture_Player, kDirection_Down)){
 Vecf Player::ReceiveInput(std::array<bool, kKey_Count> keys_down,
                     std::array<bool, 255> mouse_buttons_down) {
   Vecf movement = {0.0f,0.0f};
-  float speed = 1500;
+  float speed = 900;
   if(keys_down[kKey_Right]){
     if(keys_down[kKey_Up] || keys_down[kKey_Down]){
       speed = std::sqrt((speed * speed)/2);
@@ -36,10 +36,12 @@ Vecf Player::ReceiveInput(std::array<bool, kKey_Count> keys_down,
     movement.y += speed * g_delta_t;
   }
   
+  std::cout << g_delta_t << " " << speed * g_delta_t << std::endl;
+  
   if(movement.x != 0.0f || movement.y != 0.0f){
     body->sprite.moving = true;
-    body->sprite.animation_timer += g_delta_t;
-    if(body->sprite.animation_timer > 150){
+    body->sprite.animation_timer += g_delta_t * 1000;
+    if(body->sprite.animation_timer > 300){
       ++body->sprite.current_frame;
       if(body->sprite.current_frame == 3){
         body->sprite.current_frame = 0;

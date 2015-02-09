@@ -18,7 +18,7 @@ const int PIXEL_SIZE = 2;
 
 GameData::GameData(const Veci& window_size) :
 player(Vecf{window_size.x/2.0f, window_size.y/2.0f}),
-map_size{100,100},
+map_size{200,200},
 currently_selected_object(kEditorObject_None),
 temporary_gate(nullptr),
 temporary_wire(nullptr)
@@ -729,9 +729,62 @@ GameData::ReceiveInput( std::string text_input,
           !last_keys_down[kKey_Zoom_Out]){
   CELLS_SIZE -= 1;
   
-    for(auto &i : wire_map){
-      if(i){
-        i->body->bbox.Resize(Veci{CELLS_SIZE, CELLS_SIZE});
+  int total_map_size = map_size.x * map_size.y;
+  int x = 0;
+  int y = 0;
+    for(int i = 0 ; i < total_map_size ; i++){
+      if(wire_map[i]){
+        wire_map[i]->body->bbox.Resize(Veci{CELLS_SIZE, CELLS_SIZE});
+        wire_map[i]->body->bbox.MoveTo(Vecf{static_cast<float>(x * CELLS_SIZE), 
+                static_cast<float>(y * CELLS_SIZE)});
+      }
+      if(wire_map_underground[i]){
+        wire_map_underground[i]->body->bbox.Resize(Veci{CELLS_SIZE, CELLS_SIZE});
+        wire_map_underground[i]->body->bbox.MoveTo(Vecf{static_cast<float>(x * CELLS_SIZE), 
+                static_cast<float>(y * CELLS_SIZE)});
+      }
+      if(logic_gate_map[i]){
+        logic_gate_map[i]->body->bbox.Resize(Veci{CELLS_SIZE, CELLS_SIZE});
+        logic_gate_map[i]->body->bbox.MoveTo(Vecf{static_cast<float>(x * CELLS_SIZE), 
+                static_cast<float>(y * CELLS_SIZE)});
+      }
+      
+      ++x;
+      if(x == map_size.x){
+        ++y;
+        x = 0;
+      }
+    }
+  }
+  
+  if(keys_down[kKey_Zoom_In] &&
+          !last_keys_down[kKey_Zoom_In]){
+  CELLS_SIZE += 1;
+  
+  int total_map_size = map_size.x * map_size.y;
+  int x = 0;
+  int y = 0;
+    for(int i = 0 ; i < total_map_size ; i++){
+      if(wire_map[i]){
+        wire_map[i]->body->bbox.Resize(Veci{CELLS_SIZE, CELLS_SIZE});
+        wire_map[i]->body->bbox.MoveTo(Vecf{static_cast<float>(x * CELLS_SIZE), 
+                static_cast<float>(y * CELLS_SIZE)});
+      }
+      if(wire_map_underground[i]){
+        wire_map_underground[i]->body->bbox.Resize(Veci{CELLS_SIZE, CELLS_SIZE});
+        wire_map_underground[i]->body->bbox.MoveTo(Vecf{static_cast<float>(x * CELLS_SIZE), 
+                static_cast<float>(y * CELLS_SIZE)});
+      }
+      if(logic_gate_map[i]){
+        logic_gate_map[i]->body->bbox.Resize(Veci{CELLS_SIZE, CELLS_SIZE});
+        logic_gate_map[i]->body->bbox.MoveTo(Vecf{static_cast<float>(x * CELLS_SIZE), 
+                static_cast<float>(y * CELLS_SIZE)});
+      }
+      
+      ++x;
+      if(x == map_size.x){
+        ++y;
+        x = 0;
       }
     }
   }
@@ -991,13 +1044,13 @@ GameData::Update() {
             i - map_size.y //up
           };
           eDirection direction = wire->body->direction;
-            if(wire_map_underground[direction_grid_position[direction]] &&
-                    wire_map_underground[direction_grid_position[direction]]->output_direction == wire->output_direction){
+            if(wire_map_underground[direction_grid_position[direction]]/* &&
+                    wire_map_underground[direction_grid_position[direction]]->output_direction == wire->output_direction*/){
                 temporary_energy_map_underground[direction_grid_position[direction]][direction] = 
                         new Energy(wire->logical_state, wire->energy_value);
             } else {
-              if(wire_map[direction_grid_position[direction]] &&
-                      wire_map[direction_grid_position[direction]]->output_direction == wire->output_direction){
+              if(wire_map[direction_grid_position[direction]] /*&&
+                      wire_map[direction_grid_position[direction]]->output_direction == wire->output_direction*/){
                 temporary_energy_map[direction_grid_position[direction]][direction] =
                         new Energy(wire->logical_state, wire->energy_value);
               }
@@ -1008,9 +1061,11 @@ GameData::Update() {
     for(auto &logic_gate : logic_gate_map){
       if(logic_gate){
         logic_gate->CheckOutputToWires(energy_map, temporary_energy_map, map_size);
-        /*logic_gate->CheckOutputToUndergroundWires(
-        energy_map_underground, temporary_energy_map_underground, map_size,
-                wire_map, wire_map_underground);*/
+        logic_gate->CheckOutputToUndergroundWires(energy_map_underground, 
+                temporary_energy_map_underground, 
+                map_size, 
+                wire_map,
+                wire_map_underground);
       }
     }
 
