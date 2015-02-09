@@ -161,6 +161,18 @@ Engine::Initialize(std::string window_name, const Veci window_size) {
   sprites_data[kTexture_Wire_Underground_SemiInvisible] = 
           SpriteData(logic_sprite_sheet, 0, src_rect, 0);
   
+   src_rect = {{4,0,22,22}};
+    sprites_data[kTexture_Clock] = 
+            SpriteData(logic_sprite_sheet, 0, src_rect, 0);
+    
+  src_rect = {{4,22,22,22}};
+    sprites_data[kTexture_Clock_0] = 
+            SpriteData(logic_sprite_sheet, 0, src_rect, 0);
+    
+  src_rect = {{4,44,22,22}};
+  sprites_data[kTexture_Clock_1] = 
+          SpriteData(logic_sprite_sheet, 0, src_rect, 0);
+  
 }
 
 void 

@@ -29,6 +29,7 @@ enum eEditorObject {
   kEditorObject_Constant_0,
   kEditorObject_Separator,
   kEditorObject_ThreeState,
+  kEditorObject_Clock,
   kEditorObject_None,
   kEditorObject_Count
 };
@@ -132,7 +133,10 @@ enum eTexture {
   kTexture_ThreeState_0,
   kTexture_ThreeState_1,
   kTexture_ThreeState_Empty,
-  
+  kTexture_Clock,
+  kTexture_Clock_0,
+  kTexture_Clock_1,
+  kTexture_ThreeState,
   kTexture_None,
   kTexture_Count
 };
@@ -167,7 +171,7 @@ extern int CELLS_SIZE;
 extern const int PIXEL_SIZE;
 using milliseconds = std::chrono::milliseconds;
 
-extern int g_delta_t;
+extern float g_delta_t;
 
 
 #endif	/* UTILS_H */

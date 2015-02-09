@@ -32,7 +32,6 @@ void Label::Render(Engine& engine) {
     
     SDL_FreeSurface(surface);
     SDL_DestroyTexture(texture);
-    std::cout << bbox.top << " " << bbox.size.x << text << " " << texture <<std::endl;
   
 }
 

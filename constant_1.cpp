@@ -1,3 +1,4 @@
+#include <iostream>
 #include "constant_1.h"
 
 Constant_1::Constant_1(const Vecf& position, const eDirection direction, 
@@ -21,6 +22,8 @@ Constant_1::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
       body->sprite.texture_id = kTexture_Constant_0;
       break;
   }
+   
+   std::cout << logical_state << std::endl;
 }
 
 void Constant_1::Rotate(const eDirection direction, const Veci& map_size) {

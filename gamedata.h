@@ -67,6 +67,7 @@ struct GameData{
   inline void CheckUniqueKeyPress();
   Player player;
   Veci map_size;
+  Veci map_size_pixels;
   //grid of energy, each cell can have 4 "energy" objects, 1 from each direction
   std::vector<std::array<Energy*, 4>> energy_map;
   std::vector<std::array<Energy*, 4>> energy_map_underground;

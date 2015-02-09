@@ -107,21 +107,7 @@ bool Input::PollEvents(GameData& game_data, Engine& engine) {
     }    
   }
   
-  
-  if(keys_down[kKey_Rotate_Left]){
-    if(rotate_key_press_timer < delay_between_key_press) {
-      keys_down[kKey_Rotate_Left] = false;
-    } else {
-      rotate_key_press_timer = 0;
-    }
-  } 
-  if(keys_down[kKey_Rotate_Right]){
-    if(rotate_key_press_timer < delay_between_key_press) {
-      keys_down[kKey_Rotate_Right] = false;
-    } else {
-      rotate_key_press_timer = 0;
-    }
-  } 
+ 
   Vecf movement = game_data.ReceiveInput(text_input,
           keys_down, 
           mouse_buttons_down,
