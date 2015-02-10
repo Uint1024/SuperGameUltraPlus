@@ -35,9 +35,7 @@ Vecf Player::ReceiveInput(std::array<bool, kKey_Count> keys_down,
   if(keys_down[kKey_Down]){
     movement.y += speed * g_delta_t;
   }
-  
-  std::cout << g_delta_t << " " << speed * g_delta_t << std::endl;
-  
+
   if(movement.x != 0.0f || movement.y != 0.0f){
     body->sprite.moving = true;
     body->sprite.animation_timer += g_delta_t * 1000;

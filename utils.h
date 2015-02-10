@@ -68,7 +68,7 @@ enum eKey {
   kKey_Paste,
   kKey_Zoom_Out,
   kKey_Zoom_In,
-  
+  kKey_Toggle,
   kKey_Select,
   kKey_Delete,
   kKey_Brush,

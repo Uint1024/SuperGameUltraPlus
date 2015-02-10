@@ -414,11 +414,13 @@ GameData::Save(std::string file_name) {
         bool is_object = true;
         Vecf position = object->body->bbox.GetCoordinates();
         eDirection direction = object->body->direction;
+        eLogicalState state = object->logical_state;
 
         out.write(reinterpret_cast<char *>(&is_object), sizeof(is_object));
         out.write(reinterpret_cast<char *>(&position.x), sizeof(position.x));
         out.write(reinterpret_cast<char *>(&position.y), sizeof(position.y));
         out.write(reinterpret_cast<char *>(&direction), sizeof(direction));
+        out.write(reinterpret_cast<char *>(&state), sizeof(state));
       }
     }
     
@@ -433,11 +435,12 @@ GameData::Save(std::string file_name) {
         bool is_object = true;
         Vecf position = object->body->bbox.GetCoordinates();
         eDirection direction = object->body->direction;
-
+        eLogicalState state = object->logical_state;
         out.write(reinterpret_cast<char *>(&is_object), sizeof(is_object));
         out.write(reinterpret_cast<char *>(&position.x), sizeof(position.x));
         out.write(reinterpret_cast<char *>(&position.y), sizeof(position.y));
         out.write(reinterpret_cast<char *>(&direction), sizeof(direction));
+        out.write(reinterpret_cast<char *>(&state), sizeof(state));
       }
     }
 
@@ -523,11 +526,15 @@ GameData::Load(std::string file_name) {
       {
         Vecf position = {0.0f, 0.0f};
         eDirection direction = kDirection_Count;
-
+        eLogicalState logical_state = kLogicalState_Empty;
+        
         in.read(reinterpret_cast<char *>(&position.x), sizeof(position.x));
         in.read(reinterpret_cast<char *>(&position.y), sizeof(position.y));
         in.read(reinterpret_cast<char *>(&direction), sizeof(direction));
+        in.read(reinterpret_cast<char *>(&logical_state), sizeof(logical_state));
+        
         wire_map[i] = new Wire(position, i, direction, kEditorObject_Wire);
+        wire_map[i]->logical_state = logical_state;
       }
     }
     
@@ -550,12 +557,15 @@ GameData::Load(std::string file_name) {
       {
         Vecf position = {0.0f, 0.0f};
         eDirection direction = kDirection_Count;
-
+        eLogicalState logical_state = kLogicalState_Empty;
+        
         in.read(reinterpret_cast<char *>(&position.x), sizeof(position.x));
         in.read(reinterpret_cast<char *>(&position.y), sizeof(position.y));
         in.read(reinterpret_cast<char *>(&direction), sizeof(direction));
+        in.read(reinterpret_cast<char *>(&logical_state), sizeof(logical_state));
         wire_map_underground[i] = new Wire(position, i, direction, 
                 kEditorObject_Wire_Underground);
+        wire_map_underground[i]->logical_state = logical_state;
       }
     }
 
@@ -1049,7 +1059,8 @@ GameData::Update() {
                 temporary_energy_map_underground[direction_grid_position[direction]][direction] = 
                         new Energy(wire->logical_state, wire->energy_value);
             } else {
-              if(wire_map[direction_grid_position[direction]] /*&&
+              if(wire_map[direction_grid_position[direction]] || 
+                      logic_gate_map[direction_grid_position[direction]]/*&&
                       wire_map[direction_grid_position[direction]]->output_direction == wire->output_direction*/){
                 temporary_energy_map[direction_grid_position[direction]][direction] =
                         new Energy(wire->logical_state, wire->energy_value);
@@ -1548,8 +1559,9 @@ void GameData::CheckMouseObjectsCollision(const std::array<bool, kKey_Count>& ke
         const std::array<bool, 255>& last_mouse_buttons_down) {
   for(auto &gate : logic_gate_map) {
     if(gate) {
-      if(mouse_buttons_down[SDL_BUTTON_MIDDLE] &&
-                !last_mouse_buttons_down[SDL_BUTTON_MIDDLE] &&
+      if(((mouse_buttons_down[SDL_BUTTON_MIDDLE] &&
+                !last_mouse_buttons_down[SDL_BUTTON_MIDDLE]) ||
+              (keys_down[kKey_Toggle] && !last_keys_down[kKey_Toggle])) &&
               gate->body->bbox.CollisionWithPoint(mouse_position_in_world)){
         if(gate->object_type == kEditorObject_Constant_1){
          if(gate->logical_state == kLogicalState_0){

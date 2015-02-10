@@ -44,6 +44,7 @@ rotate_key_press_timer(0){
   keymap[SDL_SCANCODE_BACKSPACE] = kKey_Backspace;
   keymap[SDL_SCANCODE_F5] = kKey_QuickSave;
   keymap[SDL_SCANCODE_F9] = kKey_QuickLoad;
+  keymap[SDL_SCANCODE_R] = kKey_Toggle;
 }
 
 bool Input::PollEvents(GameData& game_data, Engine& engine) {

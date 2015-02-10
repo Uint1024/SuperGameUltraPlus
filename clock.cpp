@@ -34,7 +34,7 @@ void Clock::Rotate(const eDirection direction, const Veci& map_size) {
 }
 
 void Clock::RunLogic(std::vector<std::array<Energy*, 4>>& energy_map) {
-  switch_timer += g_delta_t;
+  switch_timer += g_delta_t * 1000;
   if(switch_timer >= switch_every_ms){
     reverse_input = reverse_input? false:true;
     switch_timer = 0;
